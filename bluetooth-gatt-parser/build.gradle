@@ -1,0 +1,29 @@
+plugins {
+    id 'java'
+    id 'kotlin'
+}
+
+sourceSets {
+    main.java.srcDirs = [ 'src/main/java','src/main/kotlin' ]
+    main.kotlin.srcDirs = [ 'src/main/java','src/main/kotlin' ]
+    main.resources.srcDirs = [ 'src/main/resources' ]
+    test.java.srcDirs = [ 'src/test/java','src/test/kotlin' ]
+    test.kotlin.srcDirs = [ 'src/test/java','src/test/kotlin' ]
+    test.resources.srcDirs = [ 'src/main/resources','src/test/resources' ]
+}
+
+dependencies {
+    testImplementation 'junit:junit:4.+'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    implementation "org.slf4j:slf4j-api:1.7.21"
+    implementation "org.slf4j:slf4j-simple:1.7.21"
+    implementation "com.thoughtworks.xstream:xstream:1.4.7"
+    implementation "com.google.code.gson:gson:2.7"
+    implementation "commons-beanutils:commons-beanutils:1.9.3"
+    implementation "com.google.guava:guava:18.0"
+
+    testImplementation  "org.mockito:mockito-all:1.10.19"
+    testImplementation  "junit:junit:4.8.2"
+    testImplementation  "org.powermock:powermock-module-junit4:1.7.3"
+    testImplementation  "org.powermock:powermock-api-mockito:1.7.3"
+}
