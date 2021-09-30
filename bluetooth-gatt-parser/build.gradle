@@ -23,6 +23,8 @@ task GeneratorGattJson(group: "Generator", description: "GattRegistryGenerator T
     }
 }
 
+processResources.dependsOn(GeneratorGattJson)
+
 static generate(String inputFolderName, String registryFileName) {
     final File registryFile = new File(registryFileName)
     registryFile.parentFile.mkdirs()
