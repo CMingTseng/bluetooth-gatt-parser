@@ -17,9 +17,9 @@ sourceSets {
 task GeneratorGattJson(group: "Generator", description: "GattRegistryGenerator Task") {
     doLast {
         generate("${this.projectDir.toString()}/src/main/resources/gatt/characteristic",
-                "${this.project.buildDir.toString()}/generated-sources/groovy/gatt/characteristic/gatt_spec_registry.json")
+                "${this.project.buildDir.toString()}/resources/main/gatt/characteristic/gatt_spec_registry.json")
         generate("${this.projectDir.toString()}/src/main/resources/gatt/service",
-                "${this.project.buildDir.toString()}/generated-sources/groovy/gatt/service/gatt_spec_registry.json")
+                "${this.project.buildDir.toString()}/resources/main/gatt/service/gatt_spec_registry.json")
     }
 }
 
