@@ -1,5 +1,6 @@
 plugins {
     id 'java'
+    id 'groovy'
     id 'kotlin'
 }
 
@@ -12,13 +13,46 @@ sourceSets {
     test.resources.srcDirs = [ 'src/main/resources','src/test/resources' ]
 }
 
+//TODO this section modify from GattRegistryGenerator.groovy (/src/main/script)
+task GeneratorGattJson(group: "Generator", description: "GattRegistryGenerator Task") {
+    doLast {
+        generate("${this.projectDir.toString()}/src/main/resources/gatt/characteristic",
+                "${this.project.buildDir.toString()}/generated-sources/groovy/gatt/characteristic/gatt_spec_registry.json")
+        generate("${this.projectDir.toString()}/src/main/resources/gatt/service",
+                "${this.project.buildDir.toString()}/generated-sources/groovy/gatt/service/gatt_spec_registry.json")
+    }
+}
+
+static generate(String inputFolderName, String registryFileName) {
+    final File registryFile = new File(registryFileName)
+    registryFile.parentFile.mkdirs()
+    registryFile.createNewFile()
+
+    final File directory = new File(inputFolderName)
+    final XmlParser parser = new XmlParser()
+    parser.setFeature('http://apache.org/xml/features/disallow-doctype-decl', true)
+    final def registry = new HashMap()
+    directory.eachFileMatch(~/.*.xml/) { file ->
+        def xml = parser.parse(file)
+        def type = xml.attributes()['type'];
+        if ("${type}.xml" != file.name) {
+            throw new IllegalStateException(
+                    "GATT registry generation failed. 'type' attribute ($type) does not match to its file name ($file.name)");
+        }
+        registry.put(xml.attributes()["uuid"], xml.attributes()["type"])
+    }
+    registryFile.write(new groovy.json.JsonBuilder( registry).toPrettyString())
+}
+
 dependencies {
     testImplementation 'junit:junit:4.+'
+    implementation gradleApi()
+    implementation localGroovy()
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     implementation "org.slf4j:slf4j-api:1.7.21"
     implementation "org.slf4j:slf4j-simple:1.7.21"
     implementation "com.thoughtworks.xstream:xstream:1.4.7"
-    implementation "com.google.code.gson:gson:2.7"
+    implementation "com.google.code.gson:gson:2.8.8"
     implementation "commons-beanutils:commons-beanutils:1.9.3"
     implementation "com.google.guava:guava:18.0"
 

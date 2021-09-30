@@ -25,6 +25,10 @@ buildscript {
     }
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        //TODO this for POM & script GattRegistryGenerator.groovy --> gatt xml file to gson
+        //Ref : https://www.cxyzjd.com/article/angcyo/88692186
+        classpath "org.codehaus.groovy:groovy-xml:3.0.9"
+        classpath "org.codehaus.groovy:groovy-json:3.0.7"
     }
 }
 
