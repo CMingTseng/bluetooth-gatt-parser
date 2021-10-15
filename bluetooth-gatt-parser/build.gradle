@@ -3,7 +3,7 @@ plugins {
     id 'groovy'
     id 'kotlin'
 }
-
+apply from: './version.gradle'
 sourceSets {
     main.java.srcDirs = [ 'src/main/java','src/main/kotlin' ]
     main.kotlin.srcDirs = [ 'src/main/java','src/main/kotlin' ]
@@ -16,6 +16,14 @@ sourceSets {
 //TODO this section modify from GattRegistryGenerator.groovy (/src/main/script)
 task GeneratorGattJson(group: "Generator", description: "GattRegistryGenerator Task") {
     doLast {
+        generate("${this.projectDir.toString()}/src/main/resources/gatt/characteristic/descriptor",
+                "${this.project.buildDir.toString()}/resources/main/gatt/characteristic/descriptor/gatt_spec_registry.json")
+        generate("${this.projectDir.toString()}/src/main/resources/gatt/characteristic/attribute",
+                "${this.project.buildDir.toString()}/resources/main/gatt/characteristic/attribute/gatt_spec_registry.json")
+        generate("${this.projectDir.toString()}/src/main/resources/gatt/descriptor",
+                "${this.project.buildDir.toString()}/resources/main/gatt/descriptor/gatt_spec_registry.json")
+        generate("${this.projectDir.toString()}/src/main/resources/gatt/attribute",
+                "${this.project.buildDir.toString()}/resources/main/gatt/attribute/gatt_spec_registry.json")
         generate("${this.projectDir.toString()}/src/main/resources/gatt/characteristic",
                 "${this.project.buildDir.toString()}/resources/main/gatt/characteristic/gatt_spec_registry.json")
         generate("${this.projectDir.toString()}/src/main/resources/gatt/service",
@@ -59,4 +67,23 @@ dependencies {
     testImplementation  "junit:junit:4.8.2"
     testImplementation  "org.powermock:powermock-module-junit4:1.7.3"
     testImplementation  "org.powermock:powermock-api-mockito:1.7.3"
+}
+
+task showCurrentVersion {
+    group "version Tasks"
+    this.project.ext.currentVersion("")
+}
+
+task increaseVersion {
+    group "version Tasks"
+    doLast {
+        this.project.ext.increaseVersion("")
+    }
+}
+
+task decreaseVersion {
+    group "version Tasks"
+    doLast {
+        this.project.ext.decreaseVersion("")
+    }
 }
