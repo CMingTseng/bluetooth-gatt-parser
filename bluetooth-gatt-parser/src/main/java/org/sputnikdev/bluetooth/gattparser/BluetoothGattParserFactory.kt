@@ -1,5 +1,11 @@
-package org.sputnikdev.bluetooth.gattparser;
+package org.sputnikdev.bluetooth.gattparser
 
+import org.sputnikdev.bluetooth.gattparser.num.RealNumberFormatter
+import org.sputnikdev.bluetooth.gattparser.num.TwosComplementNumberFormatter
+import org.sputnikdev.bluetooth.gattparser.num.FloatingPointNumberFormatter
+import org.sputnikdev.bluetooth.gattparser.num.IEEE754FloatingPointNumberFormatter
+import org.sputnikdev.bluetooth.gattparser.num.IEEE11073FloatingPointNumberFormatter
+import org.sputnikdev.bluetooth.gattparser.spec.BluetoothGattSpecificationReader
 /*-
  * #%L
  * org.sputnikdev:bluetooth-gatt-parser
@@ -18,89 +24,75 @@ package org.sputnikdev.bluetooth.gattparser;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * #L%
- */
-
-import org.sputnikdev.bluetooth.gattparser.num.FloatingPointNumberFormatter;
-import org.sputnikdev.bluetooth.gattparser.num.IEEE11073FloatingPointNumberFormatter;
-import org.sputnikdev.bluetooth.gattparser.num.IEEE754FloatingPointNumberFormatter;
-import org.sputnikdev.bluetooth.gattparser.num.RealNumberFormatter;
-import org.sputnikdev.bluetooth.gattparser.num.TwosComplementNumberFormatter;
-import org.sputnikdev.bluetooth.gattparser.spec.BluetoothGattSpecificationReader;
-
-/**
+ */ /**
  * A factory class for some main objects in the library:
- * {@link BluetoothGattParser}, {@link BluetoothGattSpecificationReader}.
+ * [BluetoothGattParser], [BluetoothGattSpecificationReader].
  *
  * @author Vlad Kolotov
  */
-public final class BluetoothGattParserFactory {
+object BluetoothGattParserFactory {
+    /**
+     * Returns two's complement number formatter.
+     * @return two's complement number formatter
+     */
+    val twosComplementNumberFormatter: RealNumberFormatter = TwosComplementNumberFormatter()
 
-    private static final RealNumberFormatter TWOS_COMPLEMENT_NUMBER_FORMATTER =
-            new TwosComplementNumberFormatter();
-    private static final FloatingPointNumberFormatter IEEE_754_FLOATING_POINT_NUMBER_FORMATTER =
-            new IEEE754FloatingPointNumberFormatter();
-    private static final FloatingPointNumberFormatter IEEE_11073_FLOATING_POINT_NUMBER_FORMATTER =
-            new IEEE11073FloatingPointNumberFormatter();
+    /**
+     * Returns IEEE754 floating point number formatter.
+     * @return IEEE754 floating point number formatter
+     */
+    val iEEE754FloatingPointNumberFormatter: FloatingPointNumberFormatter =
+        IEEE754FloatingPointNumberFormatter()
 
-    private static volatile BluetoothGattSpecificationReader reader;
-    private static volatile BluetoothGattParser defaultParser;
+    /**
+     * Returns IEEE11073 floating point number formatter.
+     * @return IEEE11073 floating point number formatter
+     */
+    val iEEE11073FloatingPointNumberFormatter: FloatingPointNumberFormatter =
+        IEEE11073FloatingPointNumberFormatter()
 
-    private BluetoothGattParserFactory() { }
+    @Volatile
+    private var reader: BluetoothGattSpecificationReader? = null
+
+    @Volatile
+    private var defaultParser: BluetoothGattParser? = null
 
     /**
      * Returns GATT specification reader.
      *
      * @return GATT specification reader
      */
-    public static BluetoothGattSpecificationReader getSpecificationReader() {
-        if (reader == null) {
-            synchronized (BluetoothGattParserFactory.class) {
-                if (reader == null) {
-                    reader = new BluetoothGattSpecificationReader();
+    val specificationReader: BluetoothGattSpecificationReader?
+        get() {
+            if (reader == null) {
+                synchronized(BluetoothGattParserFactory::class.java) {
+                    if (reader == null) {
+                        reader = BluetoothGattSpecificationReader()
+                    }
                 }
             }
+            return reader
         }
-        return reader;
-    }
 
     /**
      * Returns Bluetooth GATT parser.
      * @return Bluetooth GATT parser
      */
-    public static BluetoothGattParser getDefault() {
-        if (defaultParser == null) {
-            synchronized (BluetoothGattParserFactory.class) {
-                if (defaultParser == null) {
-                    BluetoothGattSpecificationReader reader = getSpecificationReader();
-                    defaultParser = new BluetoothGattParser(reader, new GenericCharacteristicParser(reader));
+    @JvmStatic
+    val default: BluetoothGattParser?
+        get() {
+            if (defaultParser == null) {
+                synchronized(BluetoothGattParserFactory::class.java) {
+                    if (defaultParser == null) {
+                        val reader = specificationReader
+                        defaultParser = BluetoothGattParser(
+                            reader!!, GenericCharacteristicParser(
+                                reader
+                            )
+                        )
+                    }
                 }
             }
+            return defaultParser
         }
-        return defaultParser;
-    }
-
-    /**
-     * Returns two's complement number formatter.
-     * @return two's complement number formatter
-     */
-    public static RealNumberFormatter getTwosComplementNumberFormatter() {
-        return TWOS_COMPLEMENT_NUMBER_FORMATTER;
-    }
-
-    /**
-     * Returns IEEE754 floating point number formatter.
-     * @return IEEE754 floating point number formatter
-     */
-    public static FloatingPointNumberFormatter getIEEE754FloatingPointNumberFormatter() {
-        return IEEE_754_FLOATING_POINT_NUMBER_FORMATTER;
-    }
-
-    /**
-     * Returns IEEE11073 floating point number formatter.
-     * @return IEEE11073 floating point number formatter
-     */
-    public static FloatingPointNumberFormatter getIEEE11073FloatingPointNumberFormatter() {
-        return IEEE_11073_FLOATING_POINT_NUMBER_FORMATTER;
-    }
-
 }

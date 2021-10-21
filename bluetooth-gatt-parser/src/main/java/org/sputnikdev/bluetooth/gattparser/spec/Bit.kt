@@ -1,4 +1,8 @@
-package org.sputnikdev.bluetooth.gattparser.spec;
+package org.sputnikdev.bluetooth.gattparser.spec
+
+import com.thoughtworks.xstream.annotations.XStreamAlias
+import com.thoughtworks.xstream.annotations.XStreamAsAttribute
+import java.math.BigInteger
 
 /*-
  * #%L
@@ -18,54 +22,32 @@ package org.sputnikdev.bluetooth.gattparser.spec;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * #L%
- */
-
-import com.thoughtworks.xstream.annotations.XStreamAlias;
-import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
-
-import java.math.BigInteger;
-
-/**
+ */ /**
  *
  * @author Vlad Kolotov
  */
 @XStreamAlias("Bit")
-public class Bit {
+class Bit {
+    @XStreamAsAttribute
+    val index = 0
 
     @XStreamAsAttribute
-    private int index;
+    val size = 0
+
     @XStreamAsAttribute
-    private int size;
-    @XStreamAsAttribute
-    private String name;
+    val name: String? = null
+
     @XStreamAlias("Enumerations")
-    private Enumerations enumerations;
-
-    public int getIndex() {
-        return index;
-    }
-
-    public int getSize() {
-        return size;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public Enumerations getEnumerations() {
-        return enumerations;
-    }
-
-    public String getFlag(byte value) {
+    val enumerations: Enumerations? = null
+    fun getFlag(value: Byte): String? {
         if (enumerations == null) {
-            return null;
+            return null
         }
-        for (Enumeration enumeration : enumerations.getEnumerations()) {
-            if (enumeration.getKey().equals(BigInteger.valueOf(value))) {
-                return enumeration.getRequires();
+        for (enumeration in enumerations.enumerations) {
+            if (enumeration.key == BigInteger.valueOf(value.toLong())) {
+                return enumeration.requires
             }
         }
-        return null;
+        return null
     }
 }

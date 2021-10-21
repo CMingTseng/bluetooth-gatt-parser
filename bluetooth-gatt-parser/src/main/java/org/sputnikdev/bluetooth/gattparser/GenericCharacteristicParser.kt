@@ -1,4 +1,18 @@
-package org.sputnikdev.bluetooth.gattparser;
+package org.sputnikdev.bluetooth.gattparser
+
+import org.slf4j.LoggerFactory
+import org.sputnikdev.bluetooth.gattparser.CharacteristicParser
+import org.sputnikdev.bluetooth.gattparser.GenericCharacteristicParser
+import org.sputnikdev.bluetooth.gattparser.CharacteristicFormatException
+import org.sputnikdev.bluetooth.gattparser.FieldHolder
+import org.sputnikdev.bluetooth.gattparser.BluetoothGattParserFactory
+import org.sputnikdev.bluetooth.gattparser.num.RealNumberFormatter
+import org.sputnikdev.bluetooth.gattparser.num.FloatingPointNumberFormatter
+import org.sputnikdev.bluetooth.gattparser.spec.*
+import java.io.UnsupportedEncodingException
+import java.lang.IllegalStateException
+import java.math.BigInteger
+import java.util.*
 
 /*-
  * #%L
@@ -18,29 +32,7 @@ package org.sputnikdev.bluetooth.gattparser;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * #L%
- */
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.sputnikdev.bluetooth.gattparser.num.FloatingPointNumberFormatter;
-import org.sputnikdev.bluetooth.gattparser.num.RealNumberFormatter;
-import org.sputnikdev.bluetooth.gattparser.spec.BluetoothGattSpecificationReader;
-import org.sputnikdev.bluetooth.gattparser.spec.Characteristic;
-import org.sputnikdev.bluetooth.gattparser.spec.Field;
-import org.sputnikdev.bluetooth.gattparser.spec.FieldFormat;
-import org.sputnikdev.bluetooth.gattparser.spec.FieldType;
-import org.sputnikdev.bluetooth.gattparser.spec.FlagUtils;
-
-import java.io.UnsupportedEncodingException;
-import java.math.BigInteger;
-import java.util.Arrays;
-import java.util.BitSet;
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Set;
-
-/**
+ */ /**
  * A generic implementation of a GATT characteristic parser capable of reading and writing standard/approved
  * Bluetooth GATT characteristics as well as user defined GATT characteristics. Quite often some parts of the Bluetooth
  * GATT specification is misleading and also incomplete, furthermore some "approved" GATT XML fields do not
@@ -50,243 +42,300 @@ import java.util.Set;
  *
  * @author Vlad Kolotov
  */
-public class GenericCharacteristicParser implements CharacteristicParser {
+class GenericCharacteristicParser(private val reader: BluetoothGattSpecificationReader) :
+    CharacteristicParser {
+    private val logger = LoggerFactory.getLogger(
+        GenericCharacteristicParser::class.java
+    )
 
-    private final Logger logger = LoggerFactory.getLogger(GenericCharacteristicParser.class);
-    private final BluetoothGattSpecificationReader reader;
-
-    GenericCharacteristicParser(BluetoothGattSpecificationReader reader) {
-        this.reader = reader;
-    }
-
-    @Override
-    public LinkedHashMap<String, FieldHolder> parse(Characteristic characteristic, byte[] raw)
-            throws CharacteristicFormatException {
-        LinkedHashMap<String, FieldHolder> result = new LinkedHashMap<>();
-
-        validate(characteristic);
-
-        int offset = 0;
-        List<Field> fields = characteristic.getValue().getFields();
-        Set<String> requires = FlagUtils.getReadFlags(fields, raw);
-        requires.add("Mandatory");
-        for (Field field : fields) {
-            List<String> requirements = field.getRequirements();
-            if (requirements != null && !requirements.isEmpty() && !requires.containsAll(requirements)) {
+    @Throws(CharacteristicFormatException::class)
+    override fun parse(
+        characteristic: Characteristic,
+        raw: ByteArray
+    ): LinkedHashMap<String, FieldHolder> {
+        val result = LinkedHashMap<String, FieldHolder>()
+        validate(characteristic)
+        var offset = 0
+        val fields = characteristic.value.fields
+        val requires = FlagUtils.getReadFlags(fields, raw)
+        requires.add("Mandatory")
+        for (field in fields) {
+            val requirements = field.requirements
+            if (requirements != null && !requirements.isEmpty() && !requires.containsAll(
+                    requirements
+                )
+            ) {
                 // skipping field as per requirement in the Flags field
-                continue;
+                continue
             }
-            if (field.getReference() != null) {
-                LinkedHashMap<String, FieldHolder> subCharacteristic =
-                        parse(reader.getCharacteristicByType(field.getReference().trim()), getRemainder(raw, offset));
-                result.putAll(subCharacteristic);
-                int size = getSize(subCharacteristic.values());
+            if (field.reference != null) {
+                val subCharacteristic = parse(
+                    reader.getCharacteristicByType(field.reference.trim { it <= ' ' }),
+                    getRemainder(raw, offset)
+                )
+                result.putAll(subCharacteristic)
+                val size = getSize(subCharacteristic.values)
                 if (size == FieldFormat.FULL_SIZE) {
-                    break;
+                    break
                 }
-                offset += size;
+                offset += size
             } else {
                 if (FlagUtils.isFlagsField(field)) {
                     // skipping flags field
-                    offset += field.getFormat().getSize();
-                    continue;
+                    offset += field.format.size
+                    continue
                 }
-                FieldFormat fieldFormat = field.getFormat();
-                result.put(field.getName(), parseField(field, raw, offset));
-                if (fieldFormat.getSize() == FieldFormat.FULL_SIZE) {
+                val fieldFormat = field.format
+                result[field.name] = parseField(field, raw, offset)
+                if (fieldFormat.size == FieldFormat.FULL_SIZE) {
                     // full size field, e.g. a string
-                    break;
+                    break
                 }
-                offset += field.getFormat().getSize();
+                offset += field.format.size
             }
         }
-        return result;
+        return result
     }
 
-    @Override
-    public byte[] serialize(Collection<FieldHolder> fieldHolders) throws CharacteristicFormatException {
-        BitSet bitSet = new BitSet();
-        int offset = 0;
-
-        for (FieldHolder holder : fieldHolders) {
-            if (holder.isValueSet()) {
-                int size = holder.getField().getFormat().getSize();
-                BitSet serialized = serialize(holder);
+    @Throws(CharacteristicFormatException::class)
+    override fun serialize(fieldHolders: Collection<FieldHolder>): ByteArray {
+        val bitSet = BitSet()
+        var offset = 0
+        for (holder in fieldHolders) {
+            if (holder.isValueSet) {
+                var size = holder.field.format.size
+                val serialized = serialize(holder)
                 if (size == FieldFormat.FULL_SIZE) {
-                    size = serialized.length();
+                    size = serialized.length()
                 }
-                concat(bitSet, serialized, offset, size);
-                offset += size;
+                concat(bitSet, serialized, offset, size)
+                offset += size
             }
         }
         // BitSet does not keep 0, fields could be set all to 0, resulting bitSet to be of 0 length,
         // however data array must not be empty, hence forcing to return an array with first byte of 0 value
-        byte[] data = bitSet.isEmpty() ? new byte[] {0} : bitSet.toByteArray();
-        return data.length > 20 ? Arrays.copyOf(bitSet.toByteArray(), 20) : data;
+        val data = if (bitSet.isEmpty) byteArrayOf(0) else bitSet.toByteArray()
+        return if (data.size > 20) Arrays.copyOf(bitSet.toByteArray(), 20) else data
     }
 
-    Object parse(Field field, byte[] raw, int offset) {
-        FieldFormat fieldFormat = field.getFormat();
-        int size = fieldFormat.getSize();
-        switch (fieldFormat.getType()) {
-            case BOOLEAN: return parseBoolean(raw, offset);
-            case UINT: return deserializeReal(raw, offset, size, false);
-            case SINT: return deserializeReal(raw, offset, size, true);
-            case FLOAT_IEE754: return deserializeFloat(
-                    BluetoothGattParserFactory.getIEEE754FloatingPointNumberFormatter(), raw, offset, size);
-            case FLOAT_IEE11073: return deserializeFloat(
-                    BluetoothGattParserFactory.getIEEE11073FloatingPointNumberFormatter(), raw, offset, size);
-            case UTF8S: return deserializeString(raw, offset, "UTF-8");
-            case UTF16S: return deserializeString(raw, offset, "UTF-16");
-            case STRUCT: return BitSet.valueOf(raw).get(offset, offset + raw.length * 8).toByteArray();
-            default:
-                throw new IllegalStateException("Unsupported field format: " + fieldFormat.getType());
+    fun parse(field: Field, raw: ByteArray, offset: Int): Any {
+        val fieldFormat = field.format
+        val size = fieldFormat.size
+        return when (fieldFormat.type) {
+            FieldType.BOOLEAN -> parseBoolean(raw, offset)
+            FieldType.UINT -> deserializeReal(
+                raw,
+                offset,
+                size,
+                false
+            )
+            FieldType.SINT -> deserializeReal(
+                raw,
+                offset,
+                size,
+                true
+            )
+            FieldType.FLOAT_IEE754 -> deserializeFloat(
+                BluetoothGattParserFactory.iEEE754FloatingPointNumberFormatter,
+                raw,
+                offset,
+                size
+            )
+            FieldType.FLOAT_IEE11073 -> deserializeFloat(
+                BluetoothGattParserFactory.iEEE11073FloatingPointNumberFormatter,
+                raw,
+                offset,
+                size
+            )
+            FieldType.UTF8S -> deserializeString(
+                raw,
+                offset,
+                "UTF-8"
+            )
+            FieldType.UTF16S -> deserializeString(
+                raw,
+                offset,
+                "UTF-16"
+            )
+            FieldType.STRUCT -> BitSet.valueOf(raw)[offset, offset + raw.size * 8].toByteArray()
+            else -> throw IllegalStateException("Unsupported field format: " + fieldFormat.type)
         }
     }
 
-    BitSet serialize(boolean value) {
-        BitSet bitSet = new BitSet();
+    fun serialize(value: Boolean): BitSet {
+        val bitSet = BitSet()
         if (value) {
-            bitSet.set(0);
+            bitSet.set(0)
         }
-        return bitSet;
+        return bitSet
     }
 
-    void concat(BitSet target, BitSet source, int offset, int size) {
-        for (int i = 0; i < size; i++) {
-            if (source.get(i)) {
-                target.set(offset + i);
+    fun concat(target: BitSet, source: BitSet, offset: Int, size: Int) {
+        for (i in 0 until size) {
+            if (source[i]) {
+                target.set(offset + i)
             }
         }
     }
 
-    private BitSet serialize(FieldHolder holder) {
-        FieldFormat fieldFormat = holder.getField().getFormat();
-        switch (fieldFormat.getType()) {
-            case BOOLEAN: return serialize(holder.getBoolean(null));
-            case UINT:
-            case SINT: return serializeReal(holder);
-            case FLOAT_IEE754: return serializeFloat(
-                    BluetoothGattParserFactory.getIEEE754FloatingPointNumberFormatter(), holder);
-            case FLOAT_IEE11073: return serializeFloat(
-                    BluetoothGattParserFactory.getIEEE11073FloatingPointNumberFormatter(), holder);
-            case UTF8S: return serializeString(holder, "UTF-8");
-            case UTF16S: return serializeString(holder, "UTF-16");
-            case STRUCT: return BitSet.valueOf((byte[]) holder.getRawValue());
-            default:
-                throw new IllegalStateException("Unsupported field format: " + fieldFormat.getType());
+    private fun serialize(holder: FieldHolder): BitSet {
+        val fieldFormat = holder.field.format
+        return when (fieldFormat.type) {
+            FieldType.BOOLEAN -> serialize(
+                holder.getBoolean(
+                    null
+                )
+            )
+            FieldType.UINT, FieldType.SINT -> serializeReal(
+                holder
+            )
+            FieldType.FLOAT_IEE754 -> serializeFloat(
+                BluetoothGattParserFactory.iEEE754FloatingPointNumberFormatter, holder
+            )
+            FieldType.FLOAT_IEE11073 -> serializeFloat(
+                BluetoothGattParserFactory.iEEE11073FloatingPointNumberFormatter, holder
+            )
+            FieldType.UTF8S -> serializeString(holder, "UTF-8")
+            FieldType.UTF16S -> serializeString(
+                holder,
+                "UTF-16"
+            )
+            FieldType.STRUCT -> BitSet.valueOf(holder.rawValue as ByteArray)
+            else -> throw IllegalStateException("Unsupported field format: " + fieldFormat.type)
         }
     }
 
-    private Boolean parseBoolean(byte[] raw, int offset) {
-        return BitSet.valueOf(raw).get(offset);
+    private fun parseBoolean(raw: ByteArray, offset: Int): Boolean {
+        return BitSet.valueOf(raw)[offset]
     }
 
-    private FieldHolder parseField(Field field, byte[] raw, int offset) {
-        FieldFormat fieldFormat = field.getFormat();
-        if (fieldFormat.getSize() != FieldFormat.FULL_SIZE && offset + fieldFormat.getSize() > raw.length * 8) {
-            throw new CharacteristicFormatException(
-                    "Not enough bits to parse field \"" + field.getName() + "\". "
-                            + "Data length: " + raw.length + " bytes. "
-                            + "Looks like your device does not conform SIG specification.");
+    private fun parseField(field: Field, raw: ByteArray, offset: Int): FieldHolder {
+        val fieldFormat = field.format
+        if (fieldFormat.size != FieldFormat.FULL_SIZE && offset + fieldFormat.size > raw.size * 8) {
+            throw CharacteristicFormatException(
+                "Not enough bits to parse field \"" + field.name + "\". "
+                        + "Data length: " + raw.size + " bytes. "
+                        + "Looks like your device does not conform SIG specification."
+            )
         }
-        Object value = parse(field, raw, offset);
-        return new FieldHolder(field, value);
-
+        val value = parse(field, raw, offset)
+        return FieldHolder(field, value)
     }
 
-    private void validate(Characteristic characteristic) {
-        if (!characteristic.isValidForRead()) {
-            logger.error("Characteristic cannot be parsed: \"{}\".", characteristic.getName());
-            throw new CharacteristicFormatException("Characteristic cannot be parsed: \"" +
-                    characteristic.getName() + "\".");
+    private fun validate(characteristic: Characteristic) {
+        if (!characteristic.isValidForRead) {
+            logger.error("Characteristic cannot be parsed: \"{}\".", characteristic.name)
+            throw CharacteristicFormatException(
+                "Characteristic cannot be parsed: \"" +
+                        characteristic.name + "\"."
+            )
         }
     }
 
-    private int getSize(Collection<FieldHolder> holders) {
-        int size = 0;
-        for (FieldHolder holder : holders) {
-            Field field = holder.getField();
-            if (field.getFormat().getSize() == FieldFormat.FULL_SIZE) {
-                return FieldFormat.FULL_SIZE;
+    private fun getSize(holders: Collection<FieldHolder>): Int {
+        var size = 0
+        for (holder in holders) {
+            val field = holder.field
+            if (field.format.size == FieldFormat.FULL_SIZE) {
+                return FieldFormat.FULL_SIZE
             }
-            size += field.getFormat().getSize();
+            size += field.format.size
         }
-        return size;
+        return size
     }
 
-    private BitSet serializeReal(FieldHolder holder) {
-        RealNumberFormatter realNumberFormatter = BluetoothGattParserFactory.getTwosComplementNumberFormatter();
-        int size = holder.getField().getFormat().getSize();
-        boolean signed = holder.getField().getFormat().getType() == FieldType.SINT;
-        if ((signed && size <= 32) || (!signed && size < 32)) {
-            return realNumberFormatter.serialize((Integer) holder.getRawValue(), size, signed);
-        } else if ((signed && size <= 64) || (!signed && size < 64)) {
-            return realNumberFormatter.serialize((Long) holder.getRawValue(), size, signed);
+    private fun serializeReal(holder: FieldHolder): BitSet {
+        val realNumberFormatter = BluetoothGattParserFactory.twosComplementNumberFormatter
+        val size = holder.field.format.size
+        val signed = holder.field.format.type == FieldType.SINT
+        return if (signed && size <= 32 || !signed && size < 32) {
+            realNumberFormatter.serialize(holder.rawValue as Int, size, signed)
+        } else if (signed && size <= 64 || !signed && size < 64) {
+            realNumberFormatter.serialize(holder.rawValue as Long, size, signed)
         } else {
-            return realNumberFormatter.serialize((BigInteger) holder.getRawValue(), size, signed);
+            realNumberFormatter.serialize(holder.rawValue as BigInteger, size, signed)
         }
     }
 
-    private Object deserializeReal(byte[] raw, int offset, int size, boolean signed) {
-        RealNumberFormatter realNumberFormatter = BluetoothGattParserFactory.getTwosComplementNumberFormatter();
-        int toIndex = offset + size;
-        if ((signed && size <= 32) || (!signed && size < 32)) {
-            return realNumberFormatter.deserializeInteger(BitSet.valueOf(raw).get(offset, toIndex), size, signed);
-        } else if ((signed && size <= 64) || (!signed && size < 64)) {
-            return realNumberFormatter.deserializeLong(BitSet.valueOf(raw).get(offset, toIndex), size, signed);
+    private fun deserializeReal(raw: ByteArray, offset: Int, size: Int, signed: Boolean): Any {
+        val realNumberFormatter = BluetoothGattParserFactory.twosComplementNumberFormatter
+        val toIndex = offset + size
+        return if (signed && size <= 32 || !signed && size < 32) {
+            realNumberFormatter.deserializeInteger(
+                BitSet.valueOf(raw)[offset, toIndex],
+                size,
+                signed
+            )
+        } else if (signed && size <= 64 || !signed && size < 64) {
+            realNumberFormatter.deserializeLong(
+                BitSet.valueOf(raw)[offset, toIndex],
+                size,
+                signed
+            )
         } else {
-            return realNumberFormatter.deserializeBigInteger(BitSet.valueOf(raw).get(offset, toIndex), size, signed);
+            realNumberFormatter.deserializeBigInteger(
+                BitSet.valueOf(raw)[offset, toIndex], size, signed
+            )
         }
     }
 
-    private Object deserializeFloat(FloatingPointNumberFormatter formatter, byte[] raw, int offset, int size) {
-        int toIndex = offset + size;
-        if (size == 16) {
-            return formatter.deserializeSFloat(BitSet.valueOf(raw).get(offset, toIndex));
+    private fun deserializeFloat(
+        formatter: FloatingPointNumberFormatter,
+        raw: ByteArray,
+        offset: Int,
+        size: Int
+    ): Any {
+        val toIndex = offset + size
+        return if (size == 16) {
+            formatter.deserializeSFloat(BitSet.valueOf(raw)[offset, toIndex])
         } else if (size == 32) {
-            return formatter.deserializeFloat(BitSet.valueOf(raw).get(offset, toIndex));
+            formatter.deserializeFloat(BitSet.valueOf(raw)[offset, toIndex])
         } else if (size == 64) {
-            return formatter.deserializeDouble(BitSet.valueOf(raw).get(offset, toIndex));
+            formatter.deserializeDouble(BitSet.valueOf(raw)[offset, toIndex])
         } else {
-            throw new IllegalStateException("Unknown bit size for float numbers: " + size);
+            throw IllegalStateException("Unknown bit size for float numbers: $size")
         }
     }
 
-    private BitSet serializeFloat(FloatingPointNumberFormatter formatter, FieldHolder holder) {
-        int size = holder.getField().getFormat().getSize();
-        if (size == 16) {
-            return formatter.serializeSFloat(holder.getFloat(null));
+    private fun serializeFloat(
+        formatter: FloatingPointNumberFormatter,
+        holder: FieldHolder
+    ): BitSet {
+        val size = holder.field.format.size
+        return if (size == 16) {
+            formatter.serializeSFloat(holder.getFloat(null))
         } else if (size == 32) {
-            return formatter.serializeFloat(holder.getFloat(null));
+            formatter.serializeFloat(holder.getFloat(null))
         } else if (size == 64) {
-            return formatter.serializeDouble(holder.getDouble(null));
+            formatter.serializeDouble(holder.getDouble(null))
         } else {
-            throw new IllegalStateException("Invalid bit size for float numbers: " + size);
+            throw IllegalStateException("Invalid bit size for float numbers: $size")
         }
     }
 
-    private String deserializeString(byte[] raw, int offset, String encoding) {
-        try {
-            return new String(BitSet.valueOf(raw).get(offset, offset + raw.length * 8).toByteArray(), encoding);
-        } catch (UnsupportedEncodingException e) {
-            throw new IllegalStateException(e);
+    private fun deserializeString(raw: ByteArray, offset: Int, encoding: String): String {
+        return try {
+            String(BitSet.valueOf(raw)[offset, offset + raw.size * 8].toByteArray(), charset(encoding) )
+        } catch (e: UnsupportedEncodingException) {
+            throw IllegalStateException(e)
         }
     }
 
-    private BitSet serializeString(FieldHolder holder, String encoding) {
-        try {
-            return BitSet.valueOf(holder.getString(null).getBytes(encoding));
-        } catch (UnsupportedEncodingException e) {
-            throw new IllegalStateException(e);
+    private fun serializeString(holder: FieldHolder, encoding: String): BitSet {
+        return try {
+            BitSet.valueOf(holder.getString(null).toByteArray(charset(encoding)))
+        } catch (e: UnsupportedEncodingException) {
+            throw IllegalStateException(e)
         }
     }
 
-    private byte[] getRemainder(byte[] raw, int offset) {
-        byte[] remained = BitSet.valueOf(raw).get(offset, raw.length * 8).toByteArray();
-        byte[] remainedWithTrailingZeros = new byte[(raw.length - (int) Math.ceil(offset / 8.0))];
-        System.arraycopy(remained, 0, remainedWithTrailingZeros, 0, remained.length);
-        return remainedWithTrailingZeros;
+    private fun getRemainder(raw: ByteArray, offset: Int): ByteArray {
+        val remained = BitSet.valueOf(raw)[offset, raw.size * 8].toByteArray()
+        val remainedWithTrailingZeros = ByteArray(
+            raw.size - Math.ceil(offset / 8.0)
+                .toInt()
+        )
+        System.arraycopy(remained, 0, remainedWithTrailingZeros, 0, remained.size)
+        return remainedWithTrailingZeros
     }
-
 }

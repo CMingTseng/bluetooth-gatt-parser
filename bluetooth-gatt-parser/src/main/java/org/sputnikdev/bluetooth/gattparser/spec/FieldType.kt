@@ -1,5 +1,4 @@
-package org.sputnikdev.bluetooth.gattparser.spec;
-
+package org.sputnikdev.bluetooth.gattparser.spec
 /*-
  * #%L
  * org.sputnikdev:bluetooth-gatt-parser
@@ -18,21 +17,10 @@ package org.sputnikdev.bluetooth.gattparser.spec;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * #L%
- */
-
-/**
+ */ /**
  *
  * @author Vlad Kolotov
  */
-public enum FieldType {
-
-    BOOLEAN,
-    UINT,
-    SINT,
-    FLOAT_IEE754,
-    FLOAT_IEE11073,
-    UTF8S,
-    UTF16S,
-    STRUCT
-
+enum class FieldType {
+    BOOLEAN, UINT, SINT, FLOAT_IEE754, FLOAT_IEE11073, UTF8S, UTF16S, STRUCT
 }

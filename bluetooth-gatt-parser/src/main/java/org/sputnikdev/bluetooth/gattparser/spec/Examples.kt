@@ -1,4 +1,8 @@
-package org.sputnikdev.bluetooth.gattparser.spec;
+package org.sputnikdev.bluetooth.gattparser.spec
+
+import com.thoughtworks.xstream.annotations.XStreamAliasType
+import com.thoughtworks.xstream.annotations.XStreamImplicit
+import java.util.*
 
 /*-
  * #%L
@@ -18,26 +22,13 @@ package org.sputnikdev.bluetooth.gattparser.spec;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * #L%
- */
-
-import java.util.Collections;
-import java.util.List;
-
-import com.thoughtworks.xstream.annotations.XStreamAliasType;
-import com.thoughtworks.xstream.annotations.XStreamImplicit;
-
-/**
+ */ /**
  *
  * @author Vlad Kolotov
  */
 @XStreamAliasType("Examples")
-public class Examples {
-
+class Examples {
     @XStreamImplicit
-    private List<String> examples;
-
-    public List<String> getExamples() {
-        return Collections.unmodifiableList(examples);
-    }
-
+    val examples: List<String>? = null
+        get() = Collections.unmodifiableList(field)
 }

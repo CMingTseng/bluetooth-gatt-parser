@@ -1,4 +1,9 @@
-package org.sputnikdev.bluetooth.gattparser;
+package org.sputnikdev.bluetooth.gattparser
+
+import org.sputnikdev.bluetooth.gattparser.CharacteristicFormatException
+import org.sputnikdev.bluetooth.gattparser.spec.Characteristic
+import org.sputnikdev.bluetooth.gattparser.FieldHolder
+import java.util.LinkedHashMap
 
 /*-
  * #%L
@@ -18,32 +23,27 @@ package org.sputnikdev.bluetooth.gattparser;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * #L%
- */
-
-import java.util.Collection;
-import java.util.LinkedHashMap;
-
-import org.sputnikdev.bluetooth.gattparser.spec.Characteristic;
-
-/**
+ */ /**
  * A root interface for all GATT characteristic parsers in the framework. It defines simple read and write operations.
  *
  * @author Vlad Kolotov
  */
-public interface CharacteristicParser {
-
+interface CharacteristicParser {
     /**
      * Read operation. This method reads raw data and converts it to a user-friends format: a map of parsed
-     * characteristic field holders. The order of fields is guaranteed by {@link LinkedHashMap}
+     * characteristic field holders. The order of fields is guaranteed by [LinkedHashMap]
      *
      * @param characteristic an instance of characteristic specification object
      * @param raw byte array of data received from bluetooth device
      * @return a map of parsed characteristic fields
      * @throws CharacteristicFormatException if provided data cannot be parsed,
-     * see {@link BluetoothGattParser#isValidForRead(String)}
+     * see [BluetoothGattParser.isValidForRead]
      */
-    LinkedHashMap<String, FieldHolder> parse(Characteristic characteristic, byte[] raw)
-            throws CharacteristicFormatException;
+    @Throws(CharacteristicFormatException::class)
+    fun parse(
+        characteristic: Characteristic?,
+        raw: ByteArray?
+    ): LinkedHashMap<String?, FieldHolder?>?
 
     /**
      * Write operation. This method serialises characteristic fields into a raw array of bytes ready to send
@@ -52,8 +52,8 @@ public interface CharacteristicParser {
      * @param fieldHolders a collection of field holders populated with user input
      * @return a raw array of bytes which is ready to be sent to a bluetooth device
      * @throws CharacteristicFormatException if provided fields cannot be serialized,
-     * see {@link BluetoothGattParser#isValidForWrite(String)}
+     * see [BluetoothGattParser.isValidForWrite]
      */
-    byte[] serialize(Collection<FieldHolder> fieldHolders) throws CharacteristicFormatException;
-
+    @Throws(CharacteristicFormatException::class)
+    fun serialize(fieldHolders: Collection<FieldHolder?>?): ByteArray?
 }

@@ -1,4 +1,8 @@
-package org.sputnikdev.bluetooth.gattparser.spec;
+package org.sputnikdev.bluetooth.gattparser.spec
+
+import com.thoughtworks.xstream.annotations.XStreamAsAttribute
+import com.thoughtworks.xstream.annotations.XStreamAlias
+import com.thoughtworks.xstream.annotations.XStreamImplicit
 
 /*-
  * #%L
@@ -18,49 +22,23 @@ package org.sputnikdev.bluetooth.gattparser.spec;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * #L%
- */
-
-import java.util.List;
-
-import com.thoughtworks.xstream.annotations.XStreamAlias;
-import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
-import com.thoughtworks.xstream.annotations.XStreamImplicit;
-
-/**
+ */ /**
  *
  * @author Vlad Kolotov
  */
-public class CharacteristicAccess {
+class CharacteristicAccess {
+    @XStreamAsAttribute
+    val name: String? = null
 
     @XStreamAsAttribute
-    private String name;
-    @XStreamAsAttribute
-    private String type;
+    val type: String? = null
+
     @XStreamAlias("InformativeText")
-    private String informativeText;
+    val informativeText: String? = null
+
     @XStreamAlias("Requirement")
-    private String requirement;
+    val requirement: String? = null
+
     @XStreamImplicit
-    private List<Properties> properties;
-
-    public String getName() {
-        return name;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public String getInformativeText() {
-        return informativeText;
-    }
-
-    public String getRequirement() {
-        return requirement;
-    }
-
-    public List<Properties> getProperties() {
-        return properties;
-    }
-
+    val properties: List<Properties>? = null
 }

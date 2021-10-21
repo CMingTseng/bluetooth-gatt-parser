@@ -1,4 +1,8 @@
-package org.sputnikdev.bluetooth.gattparser.spec;
+package org.sputnikdev.bluetooth.gattparser.spec
+
+import com.thoughtworks.xstream.annotations.XStreamAlias
+import com.thoughtworks.xstream.annotations.XStreamAsAttribute
+import org.sputnikdev.bluetooth.gattparser.spec.InformativeText
 
 /*-
  * #%L
@@ -18,47 +22,24 @@ package org.sputnikdev.bluetooth.gattparser.spec;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * #L%
- */
-
-import com.thoughtworks.xstream.annotations.XStreamAlias;
-import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
-
-/**
+ */ /**
  *
  * @author Vlad Kolotov
  */
 @XStreamAlias("Service")
-public class Service {
+class Service {
+    @XStreamAsAttribute
+    val name: String? = null
 
     @XStreamAsAttribute
-    private String name;
+    val uuid: String? = null
+
     @XStreamAsAttribute
-    private String uuid;
-    @XStreamAsAttribute
-    private String type;
+    val type: String? = null
+
     @XStreamAlias("InformativeText")
-    private InformativeText informativeText;
+    val informativeText: InformativeText? = null
+
     @XStreamAlias("Characteristics")
-    private Characteristics characteristics;
-
-    public String getName() {
-        return name;
-    }
-
-    public String getUuid() {
-        return uuid;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public InformativeText getInformativeText() {
-        return informativeText;
-    }
-
-    public Characteristics getCharacteristics() {
-        return characteristics;
-    }
-
+    val characteristics: Characteristics? = null
 }

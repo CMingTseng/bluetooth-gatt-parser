@@ -1,4 +1,7 @@
-package org.sputnikdev.bluetooth.gattparser.spec;
+package org.sputnikdev.bluetooth.gattparser.spec
+
+import com.thoughtworks.xstream.annotations.XStreamAlias
+import org.sputnikdev.bluetooth.gattparser.spec.Examples
 
 /*-
  * #%L
@@ -18,39 +21,21 @@ package org.sputnikdev.bluetooth.gattparser.spec;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * #L%
- */
-
-import com.thoughtworks.xstream.annotations.XStreamAlias;
-
-/**
+ */ /**
  *
  * @author Vlad Kolotov
  */
 @XStreamAlias("InformativeText")
-public class InformativeText {
+class InformativeText {
     @XStreamAlias("Abstract")
-    private String _abstract;
+    val abstract: String? = null
+
     @XStreamAlias("Summary")
-    private String summary;
+    val summary: String? = null
+
     @XStreamAlias("Examples")
-    private Examples examples;
+    val examples: Examples? = null
+
     @XStreamAlias("Note")
-    private String note;
-
-    public String getAbstract() {
-        return _abstract;
-    }
-
-    public String getSummary() {
-        return summary;
-    }
-
-    public Examples getExamples() {
-        return examples;
-    }
-
-    public String getNote() {
-        return note;
-    }
-
+    val note: String? = null
 }

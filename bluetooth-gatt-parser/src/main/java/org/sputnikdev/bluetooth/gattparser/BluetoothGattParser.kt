@@ -1,4 +1,13 @@
-package org.sputnikdev.bluetooth.gattparser;
+package org.sputnikdev.bluetooth.gattparser
+
+import org.slf4j.LoggerFactory
+import org.sputnikdev.bluetooth.gattparser.spec.BluetoothGattSpecificationReader
+import org.sputnikdev.bluetooth.gattparser.spec.Characteristic
+import org.sputnikdev.bluetooth.gattparser.spec.Field
+import org.sputnikdev.bluetooth.gattparser.spec.Service
+import java.lang.IllegalStateException
+import java.net.URL
+import java.util.*
 
 /*-
  * #%L
@@ -18,72 +27,50 @@ package org.sputnikdev.bluetooth.gattparser;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * #L%
- */
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.sputnikdev.bluetooth.gattparser.spec.BluetoothGattSpecificationReader;
-import org.sputnikdev.bluetooth.gattparser.spec.Characteristic;
-import org.sputnikdev.bluetooth.gattparser.spec.Field;
-import org.sputnikdev.bluetooth.gattparser.spec.Service;
-
-import java.net.URL;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
-/**
+ */ /**
  * This class encapsulates functionality for reading and writing Bluetooth GATT characteristics
  * in a user-friendly manner.
- * <br>It is capable of dealing with services and characteristics defined by
- * <a href="https://www.bluetooth.com/specifications/gatt">Bluetooth SIG</a> as well as user-defined services
+ * <br></br>It is capable of dealing with services and characteristics defined by
+ * [Bluetooth SIG](https://www.bluetooth.com/specifications/gatt) as well as user-defined services
  * and characteristics. A simple example of reading an "approved" GATT characteristic
- * (<a href="https://www.bluetooth.com/specifications/gatt/viewer?attributeXmlFile=org.bluetooth.characteristic.battery_level.xml">Battery Level</a>) would be:
+ * ([Battery Level](https://www.bluetooth.com/specifications/gatt/viewer?attributeXmlFile=org.bluetooth.characteristic.battery_level.xml)) would be:
  * <pre>
- * {@code
- *
- * BluetoothGattParser parser = BluetoothGattParserFactory.getDefault();
+ * `BluetoothGattParser parser = BluetoothGattParserFactory.getDefault();
  * String characteristicUUID = "2A19"; // battery level characteristic
  * String batteryLevelFieldName = "Level"; // name of a field in the characteristic
  * byte[] rawData = new byte[] { 51 }; // raw data received from a bluetooth device
  * parser.parse(characteristicUUID, rawData).get(batteryLevelFieldName).getInteger();
- * }
- * </pre>
- * <br>The parser can be extended with user-defined services and characteristics by adding corresponding specification
- * definitions in GATT XML files (See an example <a href="https://www.bluetooth.com/api/gatt/XmlFile?xmlFileName=org.bluetooth.characteristic.battery_level.xml">here</a>).
+` *
+</pre> *
+ * <br></br>The parser can be extended with user-defined services and characteristics by adding corresponding specification
+ * definitions in GATT XML files (See an example [here](https://www.bluetooth.com/api/gatt/XmlFile?xmlFileName=org.bluetooth.characteristic.battery_level.xml)).
  * There are two options of doing so:
- * <ul>
- * <li>By adding GATT XML files into classpath directories: "ext/gatt/service" and "ext/gatt/characteristic".
- * The parser will load specification files from those directories automatically.</li>
- * <li>By loading GATT XML files via {@link BluetoothGattParser#loadExtensionsFromFolder} method</li>
- * </ul>
- * <br>The parser can be also extended with a custom characteristic parser,
- * see {@link  BluetoothGattParser#registerParser(String, CharacteristicParser)}.
+ *
+ *  * By adding GATT XML files into classpath directories: "ext/gatt/service" and "ext/gatt/characteristic".
+ * The parser will load specification files from those directories automatically.
+ *  * By loading GATT XML files via [BluetoothGattParser.loadExtensionsFromFolder] method
+ *
+ * <br></br>The parser can be also extended with a custom characteristic parser,
+ * see [BluetoothGattParser.registerParser].
  *
  * @author Vlad Kolotov
  */
-public class BluetoothGattParser {
-
-    private final Logger logger = LoggerFactory.getLogger(GenericCharacteristicParser.class);
-
-    private BluetoothGattSpecificationReader specificationReader;
-    private final Map<String, CharacteristicParser> customParsers = new HashMap<>();
-    private CharacteristicParser defaultParser;
-
-    BluetoothGattParser(BluetoothGattSpecificationReader specificationReader, CharacteristicParser defaultParser) {
-        this.specificationReader = specificationReader;
-        this.defaultParser = defaultParser;
-    }
+class BluetoothGattParser internal constructor(
+    private val specificationReader: BluetoothGattSpecificationReader,
+    private val defaultParser: CharacteristicParser
+) {
+    private val logger = LoggerFactory.getLogger(
+        GenericCharacteristicParser::class.java
+    )
+    private val customParsers: MutableMap<String, CharacteristicParser> = HashMap()
 
     /**
      * Checks whether a provided characteristic UUID is known by the parser.
      * @param characteristicUUID UUID of a GATT characteristic
      * @return true if the parser has loaded definitions for that characteristic, false otherwise
      */
-    public boolean isKnownCharacteristic(String characteristicUUID) {
-        return specificationReader.getCharacteristicByUUID(getShortUUID(characteristicUUID)) != null;
+    fun isKnownCharacteristic(characteristicUUID: String): Boolean {
+        return specificationReader.getCharacteristicByUUID(getShortUUID(characteristicUUID)) != null
     }
 
     /**
@@ -91,94 +78,97 @@ public class BluetoothGattParser {
      * @param serviceUUID UUID of a GATT service
      * @return true if the parser has loaded definitions for that service, false otherwise
      */
-    public boolean isKnownService(String serviceUUID) {
-        return specificationReader.getService(getShortUUID(serviceUUID)) != null;
+    fun isKnownService(serviceUUID: String): Boolean {
+        return specificationReader.getService(getShortUUID(serviceUUID)) != null
     }
 
     /**
      * Performs parsing of a GATT characteristic value (byte array) into a user-friendly format
-     * (a map of parsed characteristic fields represented by {@link GattResponse}).
+     * (a map of parsed characteristic fields represented by [GattResponse]).
      *
      * @param characteristicUUID UUID of a GATT characteristic
      * @param raw byte array of data received from bluetooth device
-     * @return a map of parsed characteristic fields represented by {@link GattResponse}
+     * @return a map of parsed characteristic fields represented by [GattResponse]
      * @throws CharacteristicFormatException if a characteristic cannot be parsed
      */
-    public GattResponse parse(String characteristicUUID, byte[] raw) throws CharacteristicFormatException {
-        return new GattResponse(parseFields(characteristicUUID, raw));
+    @Throws(CharacteristicFormatException::class)
+    fun parse(characteristicUUID: String, raw: ByteArray): GattResponse {
+        return GattResponse(parseFields(characteristicUUID, raw))
     }
 
     /**
-     * Returns a list of fields represented by {@link GattRequest} for a write operation
-     * (see {@link BluetoothGattParser#serialize(GattRequest)}) of a specified GATT characteristic.
+     * Returns a list of fields represented by [GattRequest] for a write operation
+     * (see [BluetoothGattParser.serialize]) of a specified GATT characteristic.
      * Some of the returned fields can be mandatory so they have to be set before serialization,
-     * check {@link GattRequest#getRequiredFieldHolders()} and {@link BluetoothGattParser#validate(GattRequest)}
+     * check [GattRequest.getRequiredFieldHolders] and [BluetoothGattParser.validate]
      *
      * @param characteristicUUID UUID of a GATT characteristic
-     * @return list of fields represented by {@link GattRequest} for a write operation
+     * @return list of fields represented by [GattRequest] for a write operation
      */
-    public GattRequest prepare(String characteristicUUID) {
-        characteristicUUID = getShortUUID(characteristicUUID);
-        return new GattRequest(characteristicUUID,
-                specificationReader.getFields(specificationReader.getCharacteristicByUUID(characteristicUUID)));
+    fun prepare(characteristicUUID: String): GattRequest {
+        var characteristicUUID = characteristicUUID
+        characteristicUUID = getShortUUID(characteristicUUID)
+        return GattRequest(
+            characteristicUUID,
+            specificationReader.getFields(
+                specificationReader.getCharacteristicByUUID(
+                    characteristicUUID
+                )
+            )
+        )
     }
 
     /**
-     * Returns a list of fields represented by {@link GattRequest} for a write operation
-     * (see {@link BluetoothGattParser#serialize(GattRequest)}) of a specified GATT characteristic which is to be
+     * Returns a list of fields represented by [GattRequest] for a write operation
+     * (see [BluetoothGattParser.serialize]) of a specified GATT characteristic which is to be
      * initialized with the provided initial data.
      * Some of the returned fields can be mandatory so they have to be set before serialization,
-     * check {@link GattRequest#getRequiredFieldHolders()} and {@link BluetoothGattParser#validate(GattRequest)}
+     * check [GattRequest.getRequiredFieldHolders] and [BluetoothGattParser.validate]
      *
      * @param characteristicUUID UUID of a GATT characteristic
      * @param initial initial data
-     * @return list of fields represented by {@link GattRequest} for a write operation
+     * @return list of fields represented by [GattRequest] for a write operation
      */
-    public GattRequest prepare(String characteristicUUID, byte[] initial) {
-        characteristicUUID = getShortUUID(characteristicUUID);
-        return new GattRequest(characteristicUUID, parseFields(characteristicUUID, initial));
+    fun prepare(characteristicUUID: String, initial: ByteArray): GattRequest {
+        var characteristicUUID = characteristicUUID
+        characteristicUUID = getShortUUID(characteristicUUID)
+        return GattRequest(characteristicUUID, parseFields(characteristicUUID, initial))
     }
-
     /**
-     * Performs serialization of a GATT request prepared by {@link BluetoothGattParser#prepare(String)}
-     * and filled by user (see {@link GattRequest#setField}) for a further communication to a bluetooth device.
+     * Performs serialization of a GATT request prepared by [BluetoothGattParser.prepare]
+     * and filled by user (see [GattRequest.setField]) for a further communication to a bluetooth device.
      * Some of the fields can be mandatory so they have to be set before serialization,
-     * check {@link GattRequest#getRequiredFieldHolders()} and {@link BluetoothGattParser#validate(GattRequest)}.
+     * check [GattRequest.getRequiredFieldHolders] and [BluetoothGattParser.validate].
+     *
+     * @param gattRequest a GATT request object
+     * @param strict dictates whether validation has to be performed before serialization
+     * (see [BluetoothGattParser.validate])
+     * @return serialized fields as an array of bytes ready to send to a bluetooth device
+     * @throws IllegalArgumentException if provided GATT request is not valid and strict parameter is set to true
+     */
+    /**
+     * Performs serialization of a GATT request prepared by [BluetoothGattParser.prepare]
+     * and filled by user (see [GattRequest.setField]) for a further communication to a bluetooth device.
+     * Some of the fields can be mandatory so they have to be set before serialization,
+     * check [GattRequest.getRequiredFieldHolders] and [BluetoothGattParser.validate].
      *
      * @param gattRequest a GATT request object
      * @return serialized fields as an array of bytes ready to send to a bluetooth device
      * @throws IllegalArgumentException if provided GATT request is not valid
      */
-    public byte[] serialize(GattRequest gattRequest) {
-        return serialize(gattRequest, true);
-    }
-
-    /**
-     * Performs serialization of a GATT request prepared by {@link BluetoothGattParser#prepare(String)}
-     * and filled by user (see {@link GattRequest#setField}) for a further communication to a bluetooth device.
-     * Some of the fields can be mandatory so they have to be set before serialization,
-     * check {@link GattRequest#getRequiredFieldHolders()} and {@link BluetoothGattParser#validate(GattRequest)}.
-     *
-     * @param gattRequest a GATT request object
-     * @param strict dictates whether validation has to be performed before serialization
-     *               (see {@link BluetoothGattParser#validate(GattRequest)})
-     * @return serialized fields as an array of bytes ready to send to a bluetooth device
-     * @throws IllegalArgumentException if provided GATT request is not valid and strict parameter is set to true
-     */
-    public byte[] serialize(GattRequest gattRequest, boolean strict) {
-        if (strict && !validate(gattRequest)) {
-            throw new IllegalArgumentException("GATT request is not valid");
-        }
-        synchronized (customParsers) {
-            String characteristicUUID = getShortUUID(gattRequest.getCharacteristicUUID());
+    @JvmOverloads
+    fun serialize(gattRequest: GattRequest, strict: Boolean = true): ByteArray? {
+        require(!(strict && !validate(gattRequest))) { "GATT request is not valid" }
+        synchronized(customParsers) {
+            val characteristicUUID = getShortUUID(gattRequest.characteristicUUID)
             if (strict && !isValidForWrite(characteristicUUID)) {
-                throw new CharacteristicFormatException(
-                        "Characteristic is not valid for write: " + characteristicUUID);
+                throw CharacteristicFormatException(
+                    "Characteristic is not valid for write: $characteristicUUID"
+                )
             }
-            if (customParsers.containsKey(characteristicUUID)) {
-                return customParsers.get(characteristicUUID).serialize(gattRequest.getAllFieldHolders());
-            }
-            return defaultParser.serialize(gattRequest.getAllFieldHolders());
+            return if (customParsers.containsKey(characteristicUUID)) {
+                customParsers[characteristicUUID]!!.serialize(gattRequest.allFieldHolders)
+            } else defaultParser.serialize(gattRequest.allFieldHolders)
         }
     }
 
@@ -187,8 +177,8 @@ public class BluetoothGattParser {
      * @param serviceUUID UUID of a GATT service
      * @return a GATT service specification by its UUID
      */
-    public Service getService(String serviceUUID) {
-        return specificationReader.getService(getShortUUID(serviceUUID));
+    fun getService(serviceUUID: String): Service {
+        return specificationReader.getService(getShortUUID(serviceUUID))
     }
 
     /**
@@ -196,121 +186,128 @@ public class BluetoothGattParser {
      * @param characteristicUUID UUID of a GATT characteristic
      * @return a GATT characteristic specification by its UUID
      */
-    public Characteristic getCharacteristic(String characteristicUUID) {
-        return specificationReader.getCharacteristicByUUID(getShortUUID(characteristicUUID));
+    fun getCharacteristic(characteristicUUID: String): Characteristic {
+        return specificationReader.getCharacteristicByUUID(getShortUUID(characteristicUUID))
     }
 
     /**
      * Returns a list of field specifications for a given characteristic.
      * Note that field references are taken into account. Referencing fields are not returned,
-     * referenced fields returned instead (see {@link Field#getReference()}).
+     * referenced fields returned instead (see [Field.getReference]).
      *
      * @param characteristicUUID UUID of a GATT characteristic
      * @return a list of field specifications for a given characteristic
      */
-    public List<Field> getFields(String characteristicUUID) {
-        return specificationReader.getFields(getCharacteristic(getShortUUID(characteristicUUID)));
+    fun getFields(characteristicUUID: String): List<Field> {
+        return specificationReader.getFields(getCharacteristic(getShortUUID(characteristicUUID)))
     }
 
     /**
-     * Registers a new characteristic parser (see {@link CharacteristicParser}) for a given characteristic.
+     * Registers a new characteristic parser (see [CharacteristicParser]) for a given characteristic.
      * @param characteristicUUID UUID of a GATT characteristic
      * @param parser a new instance of a characteristic parser
      */
-    public void registerParser(String characteristicUUID, CharacteristicParser parser) {
-        synchronized (customParsers) {
-            customParsers.put(getShortUUID(characteristicUUID), parser);
-        }
+    fun registerParser(characteristicUUID: String, parser: CharacteristicParser) {
+        synchronized(customParsers) { customParsers.put(getShortUUID(characteristicUUID), parser) }
     }
 
     /**
      * Checks whether a given characteristic is valid for read operation
-     * (see {@link BluetoothGattParser#parse(String, byte[])}).
+     * (see [BluetoothGattParser.parse]).
      * Note that not all standard and approved characteristics are valid for automatic read operations due to
      * malformed or incorrect GATT XML specification files.
      *
      * @param characteristicUUID UUID of a GATT characteristic
      * @return true if a given characteristic is valid for read operation
      */
-    public boolean isValidForRead(String characteristicUUID) {
-        Characteristic characteristic = specificationReader.getCharacteristicByUUID(getShortUUID(characteristicUUID));
-        return characteristic != null && characteristic.isValidForRead();
+    fun isValidForRead(characteristicUUID: String): Boolean {
+        val characteristic =
+            specificationReader.getCharacteristicByUUID(getShortUUID(characteristicUUID))
+        return characteristic != null && characteristic.isValidForRead
     }
 
     /**
      * Checks whether a given characteristic is valid for write operation
-     * (see {@link BluetoothGattParser#serialize(GattRequest)}).
+     * (see [BluetoothGattParser.serialize]).
      * Note that not all standard and approved characteristics are valid for automatic write operations due to
      * malformed or incorrect GATT XML specification files.
      *
      * @param characteristicUUID UUID of a GATT characteristic
      * @return true if a given characteristic is valid for write operation
      */
-    public boolean isValidForWrite(String characteristicUUID) {
-        Characteristic characteristic = specificationReader.getCharacteristicByUUID(getShortUUID(characteristicUUID));
-        return characteristic != null && characteristic.isValidForWrite();
+    fun isValidForWrite(characteristicUUID: String): Boolean {
+        val characteristic =
+            specificationReader.getCharacteristicByUUID(getShortUUID(characteristicUUID))
+        return characteristic != null && characteristic.isValidForWrite
     }
 
     /**
-     * Checks if a GATT request object has all mandatory fields set (see {@link BluetoothGattParser#prepare(String)}).
+     * Checks if a GATT request object has all mandatory fields set (see [BluetoothGattParser.prepare]).
      *
      * @param gattRequest a GATT request object
      * @return true if a given GATT request is valid for write operation
-     * (see {@link BluetoothGattParser#serialize(GattRequest)})
+     * (see [BluetoothGattParser.serialize])
      */
-    public boolean validate(GattRequest gattRequest) {
-        FieldHolder controlPointField = gattRequest.getOpCodesFieldHolder();
-        String requirement = controlPointField != null ? controlPointField.getEnumerationRequires() : null;
-
+    fun validate(gattRequest: GattRequest): Boolean {
+        val controlPointField = gattRequest.opCodesFieldHolder
+        val requirement = controlPointField?.enumerationRequires
         if (requirement != null) {
-            List<FieldHolder> required = gattRequest.getRequiredHolders(requirement);
+            val required = gattRequest.getRequiredHolders(requirement)
             if (required.isEmpty()) {
-                logger.info("GATT request is invalid; could not find any field by requirement: {}", requirement);
-                return false;
+                logger.info(
+                    "GATT request is invalid; could not find any field by requirement: {}",
+                    requirement
+                )
+                return false
             }
-            for (FieldHolder holder : required) {
-                if (!holder.isValueSet()) {
-                    logger.info("GATT request is invalid; field is not set: {}", holder.getField().getName());
-                    return false;
+            for (holder in required) {
+                if (!holder.isValueSet) {
+                    logger.info("GATT request is invalid; field is not set: {}", holder.field.name)
+                    return false
                 }
             }
         }
-
-        for (FieldHolder holder : gattRequest.getRequiredHolders("Mandatory")) {
-            if (!holder.isValueSet()) {
-                logger.info("GATT request is invalid; field is not set: {}", holder.getField().getName());
-                return false;
+        for (holder in gattRequest.getRequiredHolders("Mandatory")) {
+            if (!holder.isValueSet) {
+                logger.info("GATT request is invalid; field is not set: {}", holder.field.name)
+                return false
             }
         }
-        return true;
+        return true
     }
 
     /**
      * This method is used to load/register custom services and characteristics
      * (defined in GATT XML specification files,
-     * see an example <a href="https://www.bluetooth.com/api/gatt/XmlFile?xmlFileName=org.bluetooth.characteristic.battery_level.xml">here</a>)
+     * see an example [here](https://www.bluetooth.com/api/gatt/XmlFile?xmlFileName=org.bluetooth.characteristic.battery_level.xml))
      * from a folder. The folder must contain two sub-folders for services and characteristics respectively:
      * "path"/service and "path"/characteristic. It is also possible to override existing services and characteristics
      * by matching UUIDs of services and characteristics in the loaded files.
      * @param path a root path to a folder containing definitions for custom services and characteristics
      */
-    public void loadExtensionsFromFolder(String path) {
-        specificationReader.loadExtensionsFromFolder(path);
+    fun loadExtensionsFromFolder(path: String?) {
+        specificationReader.loadExtensionsFromFolder(path)
     }
 
     /**
      * This method is used to load/register custom services and characteristics
      * (defined in GATT XML specification files,
-     * see an example <a href="https://www.bluetooth.com/api/gatt/XmlFile?xmlFileName=org.bluetooth.characteristic.battery_level.xml">here</a>)
+     * see an example [here](https://www.bluetooth.com/api/gatt/XmlFile?xmlFileName=org.bluetooth.characteristic.battery_level.xml))
      * from a resource URLs. The URLs must point to json object, holding filenames (types) of gatt xml specs as values
      * and their short uuid's as keys.
      * @param servicesCatalogResource a path to a folder containing definitions for custom services
      * @param characteristicsCatalogResource a path to a folder containing definitions for custom characteristics
      * @throws IllegalStateException when either argument is null
      */
-    public void loadExtensionsFromCatalogResources(URL servicesCatalogResource, URL characteristicsCatalogResource)
-            throws IllegalStateException {
-        specificationReader.loadExtensionsFromCatalogResources(servicesCatalogResource, characteristicsCatalogResource);
+    @Throws(IllegalStateException::class)
+    fun loadExtensionsFromCatalogResources(
+        servicesCatalogResource: URL?,
+        characteristicsCatalogResource: URL?
+    ) {
+        specificationReader.loadExtensionsFromCatalogResources(
+            servicesCatalogResource,
+            characteristicsCatalogResource
+        )
     }
 
     /**
@@ -319,52 +316,58 @@ public class BluetoothGattParser {
      * @param radix the radix to use in the string representation
      * @return array text representation
      */
-    public String parse(byte[] raw, int radix) {
-        String[] hexFormatted = new String[raw.length];
-        int index = 0;
-        for (byte b : raw) {
-            String num = Integer.toUnsignedString(Byte.toUnsignedInt(b), radix);
-            hexFormatted[index++] = ("00" + num).substring(num.length());
+    fun parse(raw: ByteArray, radix: Int): String {
+        val hexFormatted = arrayOfNulls<String>(raw.size)
+        var index = 0
+        for (b in raw) {
+            val num = Integer.toUnsignedString(java.lang.Byte.toUnsignedInt(b), radix)
+            hexFormatted[index++] = "00$num".substring(num.length)
         }
-        return Arrays.toString(hexFormatted);
+        return Arrays.toString(hexFormatted)
     }
 
     /**
      * Serializes a string that represents an array of bytes (comma separated, e.g: [01, 05, ab]),
-     * see ({@link #parse(byte[], int)}).
+     * see ([.parse]).
      * @param raw a string representing an array of bytes
      * @param radix the radix to use in the string representation
      * @return serialized array
      */
-    public byte[] serialize(String raw, int radix) {
-        String data = raw.replace("[", "").replace("]", "");
-        String[] tokens = data.split(",");
-        byte[] bytes = new byte[tokens.length];
-        for (int i = 0; i < tokens.length; i++) {
-            bytes[i] = (byte) (int) Integer.valueOf(tokens[i].trim(), radix);
+    fun serialize(raw: String, radix: Int): ByteArray {
+        val data = raw.replace("[", "").replace("]", "")
+        val tokens = data.split(",").toTypedArray()
+        val bytes = ByteArray(tokens.size)
+        for (i in tokens.indices) {
+            bytes[i] = (Integer.valueOf(tokens[i].trim { it <= ' ' }, radix) as Int).toByte()
         }
-        return bytes;
+        return bytes
     }
 
-    private String getShortUUID(String uuid) {
-        if (uuid.length() < 8) {
-            return uuid.toUpperCase();
-        }
-        return Long.toHexString(Long.valueOf(uuid.substring(0, 8), 16)).toUpperCase();
+    private fun getShortUUID(uuid: String): String {
+        return if (uuid.length < 8) {
+            uuid.toUpperCase()
+        } else java.lang.Long.toHexString(
+            java.lang.Long.valueOf(
+                uuid.substring(0, 8),
+                16
+            )
+        ).toUpperCase()
     }
 
-    private LinkedHashMap<String, FieldHolder> parseFields(String characteristicUUID, byte[] raw) {
-        characteristicUUID = getShortUUID(characteristicUUID);
-        synchronized (customParsers) {
+    private fun parseFields(
+        characteristicUUID: String,
+        raw: ByteArray
+    ): LinkedHashMap<String?, FieldHolder?>? {
+        var characteristicUUID = characteristicUUID
+        characteristicUUID = getShortUUID(characteristicUUID)
+        synchronized(customParsers) {
             if (!isValidForRead(characteristicUUID)) {
-                throw new CharacteristicFormatException("Characteristic is not valid for read: " + characteristicUUID);
+                throw CharacteristicFormatException("Characteristic is not valid for read: $characteristicUUID")
             }
-            Characteristic characteristic = specificationReader.getCharacteristicByUUID(characteristicUUID);
-            if (customParsers.containsKey(characteristicUUID)) {
-                return customParsers.get(characteristicUUID).parse(characteristic, raw);
-            }
-            return defaultParser.parse(characteristic, raw);
+            val characteristic = specificationReader.getCharacteristicByUUID(characteristicUUID)
+            return if (customParsers.containsKey(characteristicUUID)) {
+                customParsers[characteristicUUID]!!.parse(characteristic, raw)
+            } else defaultParser.parse(characteristic, raw)
         }
     }
-
 }

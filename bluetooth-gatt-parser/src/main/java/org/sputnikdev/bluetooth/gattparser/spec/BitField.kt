@@ -1,4 +1,8 @@
-package org.sputnikdev.bluetooth.gattparser.spec;
+package org.sputnikdev.bluetooth.gattparser.spec
+
+import com.thoughtworks.xstream.annotations.XStreamAlias
+import com.thoughtworks.xstream.annotations.XStreamImplicit
+import org.sputnikdev.bluetooth.gattparser.spec.Bit
 
 /*-
  * #%L
@@ -18,25 +22,12 @@ package org.sputnikdev.bluetooth.gattparser.spec;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * #L%
- */
-
-import java.util.List;
-
-import com.thoughtworks.xstream.annotations.XStreamAlias;
-import com.thoughtworks.xstream.annotations.XStreamImplicit;
-
-/**
+ */ /**
  *
  * @author Vlad Kolotov
  */
 @XStreamAlias("BitField")
-public class BitField {
-
+class BitField {
     @XStreamImplicit
-    private List<Bit> bits;
-
-    public List<Bit> getBits() {
-        return bits;
-    }
-
+    val bits: List<Bit>? = null
 }

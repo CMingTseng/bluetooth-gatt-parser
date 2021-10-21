@@ -1,4 +1,9 @@
-package org.sputnikdev.bluetooth.gattparser.spec;
+package org.sputnikdev.bluetooth.gattparser.spec
+
+import com.thoughtworks.xstream.annotations.XStreamAlias
+import com.thoughtworks.xstream.annotations.XStreamImplicit
+import org.sputnikdev.bluetooth.gattparser.spec.Reserved
+import java.util.*
 
 /*-
  * #%L
@@ -18,31 +23,17 @@ package org.sputnikdev.bluetooth.gattparser.spec;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * #L%
- */
-
-import com.thoughtworks.xstream.annotations.XStreamAlias;
-import com.thoughtworks.xstream.annotations.XStreamImplicit;
-
-import java.util.Collections;
-import java.util.List;
-
-/**
+ */ /**
  *
  * @author Vlad Kolotov
  */
 @XStreamAlias("Enumerations")
-public class Enumerations {
+class Enumerations {
+    @XStreamImplicit
+    val enumerations: List<Enumeration>? = null
+        get() = if (field != null) Collections.unmodifiableList(field) else null
 
     @XStreamImplicit
-    private List<Enumeration> enumerations;
-    @XStreamImplicit
-    private List<Reserved> reserves;
-
-    public List<Enumeration> getEnumerations() {
-        return enumerations != null ? Collections.unmodifiableList(enumerations) : null;
-    }
-
-    public List<Reserved> getReserves() {
-        return reserves != null ? Collections.unmodifiableList(reserves) : reserves;
-    }
+    val reserves: List<Reserved>? = null
+        get() = if (field != null) Collections.unmodifiableList(field) else field
 }

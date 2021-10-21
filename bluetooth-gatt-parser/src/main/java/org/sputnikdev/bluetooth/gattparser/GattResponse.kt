@@ -1,4 +1,7 @@
-package org.sputnikdev.bluetooth.gattparser;
+package org.sputnikdev.bluetooth.gattparser
+
+import org.sputnikdev.bluetooth.gattparser.FieldHolder
+import java.util.*
 
 /*-
  * #%L
@@ -18,76 +21,57 @@ package org.sputnikdev.bluetooth.gattparser;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * #L%
- */
-
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Set;
-
-/**
+ */ /**
  * Represents result of Bluetooth GATT characteristic deserialization. Defines some useful methods for accessing
  * deserialized field values in a user-friendly manner.
  *
  * @author Vlad Kolotov
  */
-public class GattResponse {
-
-    private final LinkedHashMap<String, FieldHolder> holders;
-
-    GattResponse(LinkedHashMap<String, FieldHolder> holders) {
-        this.holders = holders;
-    }
-
+class GattResponse internal constructor(private val holders: LinkedHashMap<String, FieldHolder>) {
     /**
      * Returns field holders in this response as a Map (field name -&gt; field holder).
      * @return field holders
      */
-    public Map<String, FieldHolder> getHolders() {
-        return Collections.unmodifiableMap(holders);
+    fun getHolders(): Map<String, FieldHolder> {
+        return Collections.unmodifiableMap(holders)
     }
 
     /**
      * Returns a list of field names in this response.
      * @return a list of field names in this response
      */
-    public Set<String> getFieldNames() {
-        return holders.keySet();
-    }
+    val fieldNames: Set<String>
+        get() = holders.keys
 
     /**
      * Returns a list of field holders in this response
      * @return a list of field holders in this response
      */
-    public Collection<FieldHolder> getFieldHolders() {
-        return holders.values();
-    }
+    val fieldHolders: Collection<FieldHolder>
+        get() = holders.values
 
     /**
      * Returns a field holder by its field name
      * @param fieldName field name
      * @return a field holder
      */
-    public FieldHolder get(String fieldName) {
-        return holders.get(fieldName);
+    operator fun get(fieldName: String): FieldHolder? {
+        return holders[fieldName]
     }
 
     /**
      * Returns the number of fields in this response
      * @return the number of fields in this response
      */
-    public int getSize() {
-        return holders.size();
-    }
+    val size: Int
+        get() = holders.size
 
     /**
      * Checks whether a field by its name exists in this response
      * @param fieldName field name
      * @return true if a requested fields exists, false otherwise
      */
-    public boolean contains(String fieldName) {
-        return holders.containsKey(fieldName);
+    operator fun contains(fieldName: String): Boolean {
+        return holders.containsKey(fieldName)
     }
-
 }

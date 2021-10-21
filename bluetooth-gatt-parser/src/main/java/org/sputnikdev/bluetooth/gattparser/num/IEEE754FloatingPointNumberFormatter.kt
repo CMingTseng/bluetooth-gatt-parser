@@ -1,4 +1,8 @@
-package org.sputnikdev.bluetooth.gattparser.num;
+package org.sputnikdev.bluetooth.gattparser.num
+
+import org.sputnikdev.bluetooth.gattparser.num.FloatingPointNumberFormatter
+import java.lang.IllegalStateException
+import java.util.*
 
 /*-
  * #%L
@@ -18,45 +22,34 @@ package org.sputnikdev.bluetooth.gattparser.num;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * #L%
- */
-
-import java.util.BitSet;
-
-/**
+ */ /**
  * IEEE754 floating point number formatter.
  * Stateless and threadsafe.
  *
  * @author Vlad Kolotov
  */
-public class IEEE754FloatingPointNumberFormatter implements FloatingPointNumberFormatter {
-
-    @Override
-    public Float deserializeSFloat(BitSet bits) {
-        throw new IllegalStateException("Operation not supported");
+class IEEE754FloatingPointNumberFormatter : FloatingPointNumberFormatter {
+    override fun deserializeSFloat(bits: BitSet?): Float? {
+        throw IllegalStateException("Operation not supported")
     }
 
-    @Override
-    public Float deserializeFloat(BitSet bits) {
-        return Float.intBitsToFloat((int) bits.toLongArray()[0]);
+    override fun deserializeFloat(bits: BitSet?): Float? {
+        return java.lang.Float.intBitsToFloat(bits!!.toLongArray()[0].toInt())
     }
 
-    @Override
-    public Double deserializeDouble(BitSet bits) {
-        return Double.longBitsToDouble(bits.toLongArray()[0]);
+    override fun deserializeDouble(bits: BitSet?): Double? {
+        return java.lang.Double.longBitsToDouble(bits!!.toLongArray()[0])
     }
 
-    @Override
-    public BitSet serializeSFloat(Float number) {
-        throw new IllegalStateException("Operation not supported");
+    override fun serializeSFloat(number: Float?): BitSet? {
+        throw IllegalStateException("Operation not supported")
     }
 
-    @Override
-    public BitSet serializeFloat(Float number) {
-        return BitSet.valueOf(new long[] { Float.floatToRawIntBits(number) });
+    override fun serializeFloat(number: Float?): BitSet? {
+        return BitSet.valueOf(longArrayOf(java.lang.Float.floatToRawIntBits(number!!).toLong()))
     }
 
-    @Override
-    public BitSet serializeDouble(Double number) {
-        return BitSet.valueOf(new long[] { Double.doubleToRawLongBits(number) });
+    override fun serializeDouble(number: Double?): BitSet? {
+        return BitSet.valueOf(longArrayOf(java.lang.Double.doubleToRawLongBits(number!!)))
     }
 }

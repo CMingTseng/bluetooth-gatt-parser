@@ -1,4 +1,7 @@
-package org.sputnikdev.bluetooth.gattparser.spec;
+package org.sputnikdev.bluetooth.gattparser.spec
+
+import com.thoughtworks.xstream.annotations.XStreamAliasType
+import com.thoughtworks.xstream.annotations.XStreamAsAttribute
 
 /*-
  * #%L
@@ -18,29 +21,15 @@ package org.sputnikdev.bluetooth.gattparser.spec;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * #L%
- */
-
-import com.thoughtworks.xstream.annotations.XStreamAliasType;
-import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
-
-/**
+ */ /**
  *
  * @author Vlad Kolotov
  */
 @XStreamAliasType("Reserved")
-public class Reserved {
+class Reserved {
+    @XStreamAsAttribute
+    val start = 0
 
     @XStreamAsAttribute
-    private int start;
-    @XStreamAsAttribute
-    private int end;
-
-    public int getStart() {
-        return start;
-    }
-
-    public int getEnd() {
-        return end;
-    }
-
+    val end = 0
 }

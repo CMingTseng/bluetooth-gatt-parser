@@ -1,4 +1,6 @@
-package org.sputnikdev.bluetooth.gattparser.spec;
+package org.sputnikdev.bluetooth.gattparser.spec
+
+import com.thoughtworks.xstream.annotations.XStreamAlias
 
 /*-
  * #%L
@@ -18,70 +20,36 @@ package org.sputnikdev.bluetooth.gattparser.spec;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * #L%
- */
-
-import com.thoughtworks.xstream.annotations.XStreamAlias;
-
-/**
+ */ /**
  *
  * @author Vlad Kolotov
  */
 @XStreamAlias("Properties")
-public class Properties {
-
+class Properties {
     @XStreamAlias("Read")
-    private String read;
+    val read: String? = null
+
     @XStreamAlias("Write")
-    private String write;
+    val write: String? = null
+
     @XStreamAlias("WriteWithoutResponse")
-    private String writeWithoutResponse;
+    val writeWithoutResponse: String? = null
+
     @XStreamAlias("SignedWrite")
-    private String signedWrite;
+    val signedWrite: String? = null
+
     @XStreamAlias("ReliableWrite")
-    private String reliableWrite;
+    val reliableWrite: String? = null
+
     @XStreamAlias("Notify")
-    private String notify;
+    val notify: String? = null
+
     @XStreamAlias("Indicate")
-    private String indicate;
+    val indicate: String? = null
+
     @XStreamAlias("WritableAuxiliaries")
-    private String writableAuxiliaries;
+    val writableAuxiliaries: String? = null
+
     @XStreamAlias("Broadcast")
-    private String broadcast;
-
-    public String getRead() {
-        return read;
-    }
-
-    public String getWrite() {
-        return write;
-    }
-
-    public String getWriteWithoutResponse() {
-        return writeWithoutResponse;
-    }
-
-    public String getSignedWrite() {
-        return signedWrite;
-    }
-
-    public String getReliableWrite() {
-        return reliableWrite;
-    }
-
-    public String getNotify() {
-        return notify;
-    }
-
-    public String getIndicate() {
-        return indicate;
-    }
-
-    public String getWritableAuxiliaries() {
-        return writableAuxiliaries;
-    }
-
-    public String getBroadcast() {
-        return broadcast;
-    }
-
+    val broadcast: String? = null
 }

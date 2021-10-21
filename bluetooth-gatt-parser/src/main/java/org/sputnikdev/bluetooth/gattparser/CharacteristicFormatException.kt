@@ -1,4 +1,6 @@
-package org.sputnikdev.bluetooth.gattparser;
+package org.sputnikdev.bluetooth.gattparser
+
+import java.lang.RuntimeException
 
 /*-
  * #%L
@@ -18,33 +20,19 @@ package org.sputnikdev.bluetooth.gattparser;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * #L%
- */
-
-/**
+ */ /**
  * This exception is thrown if a characteristic value could be parsed or serialized.
  *
  * @author Vlad Kolotov
  */
-public class CharacteristicFormatException extends RuntimeException {
-
-    public CharacteristicFormatException() {
-        super();
-    }
-
-    public CharacteristicFormatException(String message) {
-        super(message);
-    }
-
-    public CharacteristicFormatException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public CharacteristicFormatException(Throwable cause) {
-        super(cause);
-    }
-
-    protected CharacteristicFormatException(String message, Throwable cause, boolean enableSuppression,
-            boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
+class CharacteristicFormatException : RuntimeException {
+    constructor() : super() {}
+    constructor(message: String?) : super(message) {}
+    constructor(message: String?, cause: Throwable?) : super(message, cause) {}
+    constructor(cause: Throwable?) : super(cause) {}
+    protected constructor(
+        message: String?, cause: Throwable?, enableSuppression: Boolean,
+        writableStackTrace: Boolean
+    ) : super(message, cause, enableSuppression, writableStackTrace) {
     }
 }

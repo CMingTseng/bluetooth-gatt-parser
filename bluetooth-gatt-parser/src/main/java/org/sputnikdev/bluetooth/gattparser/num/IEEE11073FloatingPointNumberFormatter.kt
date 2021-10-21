@@ -1,4 +1,10 @@
-package org.sputnikdev.bluetooth.gattparser.num;
+package org.sputnikdev.bluetooth.gattparser.num
+
+import org.sputnikdev.bluetooth.gattparser.num.FloatingPointNumberFormatter
+import org.sputnikdev.bluetooth.gattparser.num.TwosComplementNumberFormatter
+import org.sputnikdev.bluetooth.gattparser.num.IEEE11073FloatingPointNumberFormatter
+import java.lang.IllegalStateException
+import java.util.*
 
 /*-
  * #%L
@@ -18,90 +24,76 @@ package org.sputnikdev.bluetooth.gattparser.num;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * #L%
- */
-
-import java.util.BitSet;
-
-/**
+ */ /**
  * IEEE11073 floating point number formatter.
  * Stateless and threadsafe.
  *
  * @author Vlad Kolotov
  */
-public class IEEE11073FloatingPointNumberFormatter implements FloatingPointNumberFormatter {
-
-    public static final int SFLOAT_NaN = 0x07FF;
-    public static final int SFLOAT_NRes = 0x0800;
-    public static final int SFLOAT_POSITIVE_INFINITY = 0x07FE;
-    public static final int SFLOAT_NEGATIVE_INFINITY = 0x0802;
-    public static final int SFLOAT_RESERVED = 0x0801;
-
-    public static final int FLOAT_NaN = 0x007FFFFF;
-    public static final int FLOAT_NRes = 0x00800000;
-    public static final int FLOAT_POSITIVE_INFINITY = 0x007FFFFE;
-    public static final int FLOAT_NEGATIVE_INFINITY = 0x00800002;
-    public static final int FLOAT_RESERVED = 0x00800001;
-
-    private static final int SFLOAT_NEGATIVE_INFINITY_SIGNED = 0xFFFFF802;
-    private static final int FLOAT_NEGATIVE_INFINITY_SIGNED = 0xFF800002;
-
-    private TwosComplementNumberFormatter twosComplementNumberFormatter = new TwosComplementNumberFormatter();
-
-    @Override
-    public Float deserializeSFloat(BitSet bits) {
-        BitSet exponentBits = bits.get(12, 16);
-        BitSet mantissaBits = bits.get(0, 12);
-        int exponent = twosComplementNumberFormatter.deserializeInteger(exponentBits, 4, true);
-        int mantissa = twosComplementNumberFormatter.deserializeInteger(mantissaBits, 12, true);
+class IEEE11073FloatingPointNumberFormatter : FloatingPointNumberFormatter {
+    private val twosComplementNumberFormatter = TwosComplementNumberFormatter()
+    override fun deserializeSFloat(bits: BitSet?): Float? {
+        val exponentBits = bits!![12, 16]
+        val mantissaBits = bits[0, 12]
+        val exponent = twosComplementNumberFormatter.deserializeInteger(exponentBits, 4, true)
+        val mantissa = twosComplementNumberFormatter.deserializeInteger(mantissaBits, 12, true)
         if (exponent == 0) {
             if (mantissa == SFLOAT_NaN) {
-                return Float.NaN;
+                return Float.NaN
             } else if (mantissa == SFLOAT_POSITIVE_INFINITY) {
-                return Float.POSITIVE_INFINITY;
+                return Float.POSITIVE_INFINITY
             } else if (mantissa == SFLOAT_NEGATIVE_INFINITY_SIGNED) {
-                return Float.NEGATIVE_INFINITY;
+                return Float.NEGATIVE_INFINITY
             }
         }
-        return (float) ((double) mantissa * Math.pow(10, exponent));
+        return (mantissa.toDouble() * Math.pow(10.0, exponent.toDouble())).toFloat()
     }
 
-    @Override
-    public Float deserializeFloat(BitSet bits) {
-        BitSet exponentBits = bits.get(24, 32);
-        BitSet mantissaBits = bits.get(0, 24);
-        int exponent = twosComplementNumberFormatter.deserializeInteger(exponentBits, 8, true);
-        int mantissa = twosComplementNumberFormatter.deserializeInteger(mantissaBits, 24, true);
+    override fun deserializeFloat(bits: BitSet?): Float? {
+        val exponentBits = bits!![24, 32]
+        val mantissaBits = bits[0, 24]
+        val exponent = twosComplementNumberFormatter.deserializeInteger(exponentBits, 8, true)
+        val mantissa = twosComplementNumberFormatter.deserializeInteger(mantissaBits, 24, true)
         if (exponent == 0) {
             if (mantissa == FLOAT_NaN) {
-                return Float.NaN;
+                return Float.NaN
             } else if (mantissa == FLOAT_POSITIVE_INFINITY) {
-                return Float.POSITIVE_INFINITY;
+                return Float.POSITIVE_INFINITY
             } else if (mantissa == FLOAT_NEGATIVE_INFINITY_SIGNED) {
-                return Float.NEGATIVE_INFINITY;
+                return Float.NEGATIVE_INFINITY
             }
         }
-        return (float) ((double) mantissa * Math.pow(10, exponent));
+        return (mantissa.toDouble() * Math.pow(10.0, exponent.toDouble())).toFloat()
     }
 
-    @Override
-    public Double deserializeDouble(BitSet bits) {
-        throw new IllegalStateException("Operation not supported");
+    override fun deserializeDouble(bits: BitSet?): Double? {
+        throw IllegalStateException("Operation not supported")
     }
 
-
-    @Override
-    public BitSet serializeSFloat(Float number) {
-        throw new IllegalStateException("Operation not supported");
+    override fun serializeSFloat(number: Float?): BitSet? {
+        throw IllegalStateException("Operation not supported")
     }
 
-    @Override
-    public BitSet serializeFloat(Float number) {
-        throw new IllegalStateException("Operation not supported");
+    override fun serializeFloat(number: Float?): BitSet? {
+        throw IllegalStateException("Operation not supported")
     }
 
-    @Override
-    public BitSet serializeDouble(Double number) {
-        throw new IllegalStateException("Operation not supported");
+    override fun serializeDouble(number: Double?): BitSet? {
+        throw IllegalStateException("Operation not supported")
     }
 
+    companion object {
+        const val SFLOAT_NaN = 0x07FF
+        const val SFLOAT_NRes = 0x0800
+        const val SFLOAT_POSITIVE_INFINITY = 0x07FE
+        const val SFLOAT_NEGATIVE_INFINITY = 0x0802
+        const val SFLOAT_RESERVED = 0x0801
+        const val FLOAT_NaN = 0x007FFFFF
+        const val FLOAT_NRes = 0x00800000
+        const val FLOAT_POSITIVE_INFINITY = 0x007FFFFE
+        const val FLOAT_NEGATIVE_INFINITY = 0x00800002
+        const val FLOAT_RESERVED = 0x00800001
+        private const val SFLOAT_NEGATIVE_INFINITY_SIGNED = -0x7fe
+        private const val FLOAT_NEGATIVE_INFINITY_SIGNED = -0x7ffffe
+    }
 }

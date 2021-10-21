@@ -1,4 +1,7 @@
-package org.sputnikdev.bluetooth.gattparser.num;
+package org.sputnikdev.bluetooth.gattparser.num
+
+import java.math.BigInteger
+import java.util.*
 
 /*-
  * #%L
@@ -18,18 +21,12 @@ package org.sputnikdev.bluetooth.gattparser.num;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * #L%
- */
-
-import java.math.BigInteger;
-import java.util.BitSet;
-
-/**
+ */ /**
  * Real number formatter interface. Defines methods for serialization and deserialization of real numbers.
  *
  * @author Vlad Kolotov
  */
-public interface RealNumberFormatter {
-
+interface RealNumberFormatter {
     /**
      * Performs deserialization of a sequence of bits representing a real number into an Integer object
      * @param bits a sequence of bits representing a real number
@@ -37,7 +34,7 @@ public interface RealNumberFormatter {
      * @param signed indicates whether a given sequence represents a signed number
      * @return decoded number
      */
-    Integer deserializeInteger(BitSet bits, int size, boolean signed);
+    fun deserializeInteger(bits: BitSet?, size: Int, signed: Boolean): Int?
 
     /**
      * Performs deserialization of a sequence of bits representing a real number into a Long object
@@ -46,7 +43,7 @@ public interface RealNumberFormatter {
      * @param signed indicates whether a given sequence represents a signed number
      * @return decoded number
      */
-    Long deserializeLong(BitSet bits, int size, boolean signed);
+    fun deserializeLong(bits: BitSet?, size: Int, signed: Boolean): Long?
 
     /**
      * Performs deserialization of a sequence of bits representing a real number into a BigInteger object
@@ -55,7 +52,7 @@ public interface RealNumberFormatter {
      * @param signed indicates whether a given sequence represents a signed number
      * @return decoded number
      */
-    BigInteger deserializeBigInteger(BitSet bits, int size, boolean signed);
+    fun deserializeBigInteger(bits: BitSet?, size: Int, signed: Boolean): BigInteger?
 
     /**
      * Performs serialization of a given real number encoded as an Integer object into a sequence of bits
@@ -64,7 +61,7 @@ public interface RealNumberFormatter {
      * @param signed indicates whether a given real number is a signed number
      * @return serialized sequence of bits
      */
-    BitSet serialize(Integer number, int size, boolean signed);
+    fun serialize(number: Int?, size: Int, signed: Boolean): BitSet?
 
     /**
      * Performs serialization of a given real number encoded as a Long object into a sequence of bits
@@ -73,7 +70,7 @@ public interface RealNumberFormatter {
      * @param signed indicates whether a given real number is a signed number
      * @return serialized sequence of bits
      */
-    BitSet serialize(Long number, int size, boolean signed);
+    fun serialize(number: Long?, size: Int, signed: Boolean): BitSet?
 
     /**
      * Performs serialization of a given real number encoded as a BigInteger object into a sequence of bits
@@ -82,6 +79,5 @@ public interface RealNumberFormatter {
      * @param signed indicates whether a given real number is a signed number
      * @return serialized sequence of bits
      */
-    BitSet serialize(BigInteger number, int size, boolean signed);
-
+    fun serialize(number: BigInteger?, size: Int, signed: Boolean): BitSet?
 }

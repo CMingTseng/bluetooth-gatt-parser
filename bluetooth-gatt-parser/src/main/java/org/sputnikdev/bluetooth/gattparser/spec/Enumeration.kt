@@ -1,4 +1,8 @@
-package org.sputnikdev.bluetooth.gattparser.spec;
+package org.sputnikdev.bluetooth.gattparser.spec
+
+import com.thoughtworks.xstream.annotations.XStreamAlias
+import com.thoughtworks.xstream.annotations.XStreamAsAttribute
+import java.math.BigInteger
 
 /*-
  * #%L
@@ -18,37 +22,18 @@ package org.sputnikdev.bluetooth.gattparser.spec;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * #L%
- */
-
-import com.thoughtworks.xstream.annotations.XStreamAlias;
-import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
-
-import java.math.BigInteger;
-
-/**
+ */ /**
  *
  * @author Vlad Kolotov
  */
 @XStreamAlias("Enumeration")
-public class Enumeration {
+class Enumeration {
+    @XStreamAsAttribute
+    val key: BigInteger? = null
 
     @XStreamAsAttribute
-    private BigInteger key;
+    val value: String? = null
+
     @XStreamAsAttribute
-    private String value;
-    @XStreamAsAttribute
-    private String requires;
-
-    public BigInteger getKey() {
-        return key;
-    }
-
-    public String getValue() {
-        return value;
-    }
-
-    public String getRequires() {
-        return requires;
-    }
-
+    val requires: String? = null
 }

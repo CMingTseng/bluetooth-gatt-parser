@@ -1,4 +1,6 @@
-package org.sputnikdev.bluetooth.gattparser.num;
+package org.sputnikdev.bluetooth.gattparser.num
+
+import java.util.*
 
 /*-
  * #%L
@@ -18,17 +20,12 @@ package org.sputnikdev.bluetooth.gattparser.num;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * #L%
- */
-
-import java.util.BitSet;
-
-/**
+ */ /**
  * Decimal number formatter interface. Defines methods for serialization and deserialization of floating point numbers.
  *
  * @author Vlad Kolotov
  */
-public interface FloatingPointNumberFormatter {
-
+interface FloatingPointNumberFormatter {
     /**
      * Performs deserialization of a bit sequence representing a short decimal number encoded as a sfloat number
      * into a Float object. See specification for sfloat data type, for example in the IEEE11073 standard.
@@ -36,7 +33,7 @@ public interface FloatingPointNumberFormatter {
      * @param bits a sequence of bits
      * @return decoded Float object
      */
-    Float deserializeSFloat(BitSet bits);
+    fun deserializeSFloat(bits: BitSet?): Float?
 
     /**
      * Performs deserialization of a bit sequence representing a decimal number encoded as a float number
@@ -45,7 +42,7 @@ public interface FloatingPointNumberFormatter {
      * @param bits a sequence of bits
      * @return decoded Float object
      */
-    Float deserializeFloat(BitSet bits);
+    fun deserializeFloat(bits: BitSet?): Float?
 
     /**
      * Performs deserialization of a bit sequence representing a decimal number encoded as a double number
@@ -54,7 +51,7 @@ public interface FloatingPointNumberFormatter {
      * @param bits a sequence of bits
      * @return decoded Double object
      */
-    Double deserializeDouble(BitSet bits);
+    fun deserializeDouble(bits: BitSet?): Double?
 
     /**
      * Performs serialization of a Float number into a sequence of bits representing that number in a sfloat format.
@@ -63,7 +60,7 @@ public interface FloatingPointNumberFormatter {
      * @param number a Float number
      * @return serialized sequence of bits
      */
-    BitSet serializeSFloat(Float number);
+    fun serializeSFloat(number: Float?): BitSet?
 
     /**
      * Performs serialization of a Float number into a sequence of bits representing that number in a float format.
@@ -71,7 +68,7 @@ public interface FloatingPointNumberFormatter {
      * @param number a Float number
      * @return serialized sequence of bits
      */
-    BitSet serializeFloat(Float number);
+    fun serializeFloat(number: Float?): BitSet?
 
     /**
      * Performs serialization of a Double number into a sequence of bits representing that number in a double format.
@@ -79,6 +76,5 @@ public interface FloatingPointNumberFormatter {
      * @param number a Double number
      * @return serialized sequence of bits
      */
-    BitSet serializeDouble(Double number);
-
+    fun serializeDouble(number: Double?): BitSet?
 }
