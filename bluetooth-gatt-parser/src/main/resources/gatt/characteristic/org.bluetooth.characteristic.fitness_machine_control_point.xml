@@ -4,5 +4,91 @@
   <InformativeText>
     <Summary>The Fitness Machine Control Point characteristic is defined in the Fitness Machine Service Specification.</Summary>
   </InformativeText>
+  <Value>
+    <Field name="Op Codes">
+      <Requirement>Mandatory</Requirement>
+      <Format>uint8</Format>
+      <Enumerations>
+        <Enumeration key="1" value="Request Control" requires="M" description="Initiates the procedure to request the control of a fitness machine.The response to this control point is Op Code 0x80 followed by the appropriate Parameter Value." />
+        <Enumeration key="2" value="Reset" requires="M" description="Initiates the procedure to reset the controllable settings of a fitness machine.The response to this control point is Op Code 0x80 followed by the appropriate Parameter Value." />
+        <Enumeration key="3" value="Set Target Speed" requires="C1" description="Initiate the procedure to set the target speed of the Server.The desired target speed is sent as parameters to this op code.The response to this control point is Op Code 0x80 followed by the appropriate Parameter Value." />
+        <Enumeration key="4" value="Set Target Inclination" requires="C2" description="Initiate the procedure to set the target inclination of the Server.The desired target inclination is sent as parameters to this op code.The response to this control point is Op Code 0x80 followed by the appropriate Parameter Value." />
+        <Enumeration key="5" value="Set Target Resistance Level" requires="C3" description="Initiate the procedure to set the target resistance level of the Server. The desired target resistance level is sent as parameters to this op code.The response to this control point is Op Code 0x80 followed by the appropriate Parameter Value." />
+        <Enumeration key="6" value="Set Target Power" requires="C4" description="Initiate the procedure to set the target power of the Server. The desired target power is sent as parameters to this op code.The response to this control point is Op Code 0x80 followed by the appropriate Parameter Value." />
+        <Enumeration key="7" value="Set Target Heart Rate" requires="C5" description="Initiate the procedure to set the target heart rate of the Server.The desired target heart rate is sent as parameters to this op code.The response to this control point is Op Code 0x80 followed by the appropriate Parameter Value." />
+        <Enumeration key="8" value="Start or Resume" requires="M" description="Initiate the procedure to start or resume a training session on the Server.The response to this control point is Op Code 0x80 followed by the appropriate Parameter Value." />
+        <Enumeration key="9" value="Stop or Pause" requires="M" description="Initiate the procedure to stop or pause a training session on the Server.The response to this control point is Op Code 0x80 followed by the appropriate Parameter Value." />
+        <Enumeration key="10" value="Set Targeted Expended Energy" requires="C6" description="Set the targeted expended energy for a training session on the Server.The response to this control point is Op Code 0x80 followed by the appropriate Parameter Value." />
+        <Enumeration key="11" value="Set Targeted Number of Steps" requires="C7" description="Set the targeted number of steps for a training session on the Server.The response to this control point is Op Code 0x80 followed by the appropriate Parameter Value." />
+        <Enumeration key="12" value="Set Targeted Number of Strides" requires="C8" description="Set the targeted number of strides for a training session on the Server.The response to this control point is Op Code 0x80 followed by the appropriate Parameter Value." />
+        <Enumeration key="13" value="Set Targeted Distance" requires="C9"  description="Set the targeted distance for a training session on the Server.The response to this control point is Op Code 0x80 followed by the appropriate Parameter Value." />
+        <Enumeration key="14" value="Set Targeted Training Time" requires="C10" description="Set the targeted training time for a training session on the Server.The response to this control point is Op Code 0x80 followed by the appropriate Parameter Value." />
+        <Enumeration key="15" value="Set Targeted Time in Two Heart Rate Zones" requires="C11" description="Set the targeted time in two heart rate zones for a training session on the Server.The response to this control point is Op Code 0x80 followed by the appropriate Parameter Value." />
+        <Enumeration key="16" value="Set Targeted Time in Three Heart Rate Zones" requires="C12" description="Set the targeted time in three heart rate zones for a training session on the Server.The response to this control point is Op Code 0x80 followed by the appropriate Parameter Value." />
+        <Enumeration key="17" value="Set Targeted Time in Five Heart Rate Zones" requires="C13" description="Set the targeted time in five heart rate zones for a training session on the Server.The response to this control point is Op Code 0x80 followed by the appropriate Parameter Value." />
+        <Enumeration key="18" value="Set Indoor Bike Simulation Parameters" requires="C14" description="Set the simulation parameters for a training session on the Server.The response to this control point is Op Code 0x80 followed by the appropriate Parameter Value." />
+        <Enumeration key="19" value="Set Wheel Circumference" description="Set the wheel circumference for a training session on the Server.The response to this control point is Op Code 0x80 followed by the appropriate Parameter Value." />
+        <Enumeration key="20" value="Spin Down Control" description="Control the spin down procedure of a Server.The response to this control point is Op Code 0x80 followed by the appropriate Parameter Value." />
+        <Enumeration key="21" value="Set Targeted Cadence" requires="C15" description="Set the targeted cadence for a training session on the Server.The response to this control point is Op Code 0x80 followed by the appropriate Parameter Value." />
+
+        <Enumeration key="32" value="Response Code" description="Used to identify the response to this Control Point." />
+<!--        FIXME-->
+        <ReservedForFutureUse start="0" end="0" />
+        <ReservedForFutureUse start="9" end="31" />
+        <ReservedForFutureUse start="33" end="255" />
+      </Enumerations>
+    </Field>
+
+<!--    FIXME Ref : 4.16.2.1  Request Control Procedure -->
+<!--    Ref : Table 4.24 defines the Result Code for the Fitness Machine Control Point-->
+    <Field name="Op Code - Response Codes">
+      <Requirement>Mandatory</Requirement>
+      <Format>uint8</Format>
+      <Enumerations>
+        <Enumeration key="0" value="Reserved for Future Use" description="N/A" />
+        <Enumeration key="1" value="Success" description="Normal response for successful operation. " />
+        <Enumeration key="2" value="Op Code not supported" description="Normal response if unsupported Op Code is received." />
+        <Enumeration key="3" value="Invalid Parameter" description="Normal response if Operand received does not meet the requirements of the service." />
+        <Enumeration key="4" value="Operation Failed" description="Normal response if unable to complete a procedure for any reason." />
+        <Enumeration key="5" value="Control Not Permitted " description="Normal response if Operand received does not meet the range requirements " />
+        <ReservedForFutureUse start="6" end="255" />
+      </Enumerations>
+    </Field>
+    <Field name="Response Value">
+      <InformativeText>The Response Value is a sub field of the Parameter Value for "Response Code" Op Code
+        <br>
+          C1: This Field is Mandatory for "Response Code" Op Code, otherwise this field is Excluded.
+        </br>
+      </InformativeText>
+      <Requirement>C1</Requirement>
+      <Format>uint8</Format>
+      <Enumerations>
+        <Enumeration key="0" value="Reserved for Future Use" description="N/A" />
+        <Enumeration key="1" value="Success" description="Response for successful operation. "/>
+        <Enumeration key="2" value="Op Code not Supported" description="Response if unsupported Op Code is received."/>
+        <Enumeration key="3" value="Invalid Parameter" description="Response if Parameter received does not meet the requirements of the service or is outside of the supported range of the Sensor."/>
+        <Enumeration key="4" value="Operation Failed" description="Response if the requested procedure failed."/>
+        <Enumeration key="5" value="Control Not Permitted " description="Normal response if Operand received does not meet the range requirements " />
+        <ReservedForFutureUse start="6" end="255" />
+      </Enumerations>
+    </Field>
+    <Field name="Parameter Value">
+      <!--<InformativeText>Parameter Value for the Op Code defined above.</InformativeText>-->
+      <Requirement>Optional</Requirement>
+      <Format>variable</Format>
+      <Description>Defined per Service specification.</Description>
+    </Field>
+
+    <Field name="Response Parameter">
+      <InformativeText>The Response Parameter is a sub field of the Parameter Value for "Response Code" Op Code.
+        <br>
+          C2:This Field is Optional for "Response Code" Op Code, otherwise this field is Excluded.
+        </br>
+      </InformativeText>
+      <Requirement>C2</Requirement>
+      <Format>variable</Format>
+      <Description>Note: The Response Parameter Value of the response to the Control Point is a variable length field to allow a list of different values defined by the Service Specification.</Description>
+    </Field>
+  </Value>
 </Characteristic>
 

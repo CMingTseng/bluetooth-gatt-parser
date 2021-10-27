@@ -4,5 +4,53 @@
   <InformativeText>
     <Summary>The Fitness Machine Status characteristic is defined in the Fitness Machine Service Specification.</Summary>
   </InformativeText>
+  <Value>
+    <Field name="Op Codes">
+      <Requirement>Mandatory</Requirement>
+      <Format>uint8</Format>
+      <Enumerations>
+        <Enumeration key="0" value="Reserved for future use" description="N/A"/>
+        <Enumeration key="1" value="Reset" description="N/A"/>
+        <Enumeration key="2" value="Fitness Machine Stopped or Paused by the User" description="Control Information" />
+        <Enumeration key="3" value="Fitness Machine Stopped by Safety Key" description="N/A"/>
+        <Enumeration key="4" value="Fitness Machine Started or Resumed by the User " description="N/A"/>
+        <Enumeration key="5" value="Target Speed Changed" description="New Target Value (UINT16 in kilometer per hour with a resolution 0.01 km/h)"/>
+        <Enumeration key="6" value="Target Incline Changed" description="New Target Value (SINT16 in % with a resolution of 0.1 %) "/>
+        <Enumeration key="7" value="Target Resistance Level Changed" description="New Target Value (UINT8, unitless with a resolution of 0.1)"/>
+        <Enumeration key="8" value="Target Power Changed" description="New Target Power (SINT16, in Watt with a resolution of 1)"/>
+        <Enumeration key="9" value="Target Heart Rate Changed" description="New Target Heart Rate (UINT8, in BPM with a resolution of 1)"/>
+        <Enumeration key="10" value="Targeted Time in Three Heart Rate Zones Changed" description="New Targeted Time Array"/>
+        <Enumeration key="11" value="Targeted Time in Five Heart Rate Zones Changed" description="New Targeted Time Array"/>
+        <Enumeration key="12" value="Indoor Bike Simulation Parameters Changed" description=" New Indoor Bike Simulation Parameters"/>
+        <Enumeration key="13" value="Wheel Circumference Changed " description="New Wheel Circumference (UINT16, in Millimeters with resolution of 0.1 Millimeter)"/>
+        <Enumeration key="14" value="Spin Down Status" description="Spin Down Status Value"/>
+        <Enumeration key="15" value="Targeted Cadence Changed" description="New Targeted Cadence (UINT16, in 1/minute with a resolution of 0.5)"/>
+        <Enumeration key="A" value="Targeted Expended Energy Changed" description="New Targeted Expended Energy (UINT16, in Calories with a resolution of 1)"/>
+        <Enumeration key="B" value="Targeted Number of Steps Changed" description="New Targeted Number of Steps Value (UINT16, in Steps with a resolution of 1)"/>
+        <Enumeration key="C" value="Targeted Number of Strides Changed" description="New Targeted Number of Strides (UINT16, in Stride with a resolution of 1)"/>
+        <Enumeration key="D" value="Targeted Distance Changed" description="New Targeted Distance (UINT24, in Meters with a resolution of 1)"/>
+        <Enumeration key="E" value="Targeted Training Time Changed" description="New Targeted Training Time (UINT16,in Seconds with a resolution of 1)"/>
+        <Enumeration key="255" value="Control Permission Lost" description="N/A"/>
+        <!--        FIXME-->
+        <ReservedForFutureUse start="0" end="0" />
+        <ReservedForFutureUse start="16" end="254" />
+      </Enumerations>
+    </Field>
+
+    <!--    FIXME Ref : Table 4.27: Spin Down Status value definition  -->
+    <!--    Ref : Table 4.24 defines the Result Code for the Fitness Machine Control Point-->
+    <Field name="Op Code - Spin Down Status Value">
+      <Requirement>Mandatory</Requirement>
+      <Format>uint8</Format>
+      <Enumerations>
+        <Enumeration key="0" value="Reserved for Future Use" description="N/A" />
+        <Enumeration key="1" value="Spin Down Requested" description="N/A" />
+        <Enumeration key="2" value="Success" description="N/A" />
+        <Enumeration key="3" value="Error" description="N/A" />
+        <Enumeration key="4" value="Stop Pedaling" description="N/A" />
+        <ReservedForFutureUse start="5" end="255" />
+      </Enumerations>
+    </Field>
+  </Value>
 </Characteristic>
 

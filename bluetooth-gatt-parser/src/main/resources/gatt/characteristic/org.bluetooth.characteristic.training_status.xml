@@ -4,5 +4,56 @@
                 type="org.bluetooth.characteristic.training_status" uuid="2AD3" last-modified="2017-02-14" approved="Yes">
     <InformativeText>
         <Summary>The Training Status characteristic is defined in the Fitness Machine Service Specification.</Summary>
+        <Abstract>
+            The Alert Status characteristic defines the Status of alert.
+            <p>Bit 0, meaning “Ringer State”</p>
+            <p>Bit 1, meaning “Vibrator State”</p>
+            <p>Bit 2, meaning "Display Alert Status"</p>
+        </Abstract>
+        <Examples>
+            <Example>Bit 0, 0 meaning “Ringer State” not active, 1 meaning “Ringer State” active</Example>
+            <Example>Bit 1, 0 meaning “Vibrator State” not active, 1 meaning “Vibrator State” active</Example>
+            <Example>Bit 2, 0 meaning “Display Alert State” not active, 1 meaning “Display Alert State” active</Example>
+        </Examples>
 	</InformativeText>
+    <Value>
+        <Field name="Training Status">
+            <Requirement>Mandatory</Requirement>
+            <Format>uint8</Format>
+            <Minimum>0</Minimum>
+            <Maximum>1</Maximum>
+
+            <BitField>
+                <Bit index="0" size="1" name="Training Status String present">
+                    <Enumerations>
+                        <Enumeration key="0" value="Other" />
+                        <Enumeration key="1" value="Idle" />
+                        <Enumeration key="2" value="Warming Up" />
+                        <Enumeration key="3" value="Low Intensity Interval" />
+                        <Enumeration key="4" value="High Intensity Interval" />
+                        <Enumeration key="5" value="Recovery Interval" />
+                        <Enumeration key="6" value="Isometric" />
+                        <Enumeration key="7" value="Heart Rate Control" />
+                        <Enumeration key="8" value="Fitness Test " />
+                        <Enumeration key="9" value="Speed Outside of Control Region - Low (increase speed to return to controllable region) " />
+                        <Enumeration key="A" value="Speed Outside of Control Region - High (decrease speed to return to controllable region)" />
+                        <Enumeration key="B" value="Cool Down" />
+                        <Enumeration key="C" value="Watt Control" />
+                        <Enumeration key="D" value="Manual Mode (Quick Start)" />
+                        <Enumeration key="E" value="Pre-Workout" />
+                        <Enumeration key="F" value="Post-Workout" />
+                        <ReservedForFutureUse start="10" end="255" />
+                    </Enumerations>
+                </Bit>
+                <Bit index="1" size="1" name="Extended String present">
+                    <Enumerations>
+                        <Enumeration key="0" value="Vibrate State not active" />
+                        <Enumeration key="1" value="Vibrate State active" />
+                    </Enumerations>
+                </Bit>
+
+                <ReservedForFutureUse index="2" size="7"></ReservedForFutureUse>
+            </BitField>
+        </Field>
+    </Value>
 </Characteristic>
