@@ -56,6 +56,15 @@ okhttp = "4.12.0"
 
 #endregion
 
+#region Permissions
+moko-permissions-version= "0.17.0"
+#endregion
+
+#region Page
+pagingCommon = "3.1.1-0.3.1"
+pagingComposeCommon = "3.3.0-alpha02-0.5.1"
+#endregion
+
 #region Image
 coil = "3.0.0-alpha01"
 kamelImage = "0.9.0"
@@ -207,6 +216,17 @@ koin-ktor = { module = "io.insert-koin:koin-ktor", version.ref = "koin-version" 
 koin-jb-compose = { module = "io.insert-koin:koin-compose", version.ref = "koin-jb-compose-version" }
 #endregion
 
+#region Page
+paging-common = { module = "app.cash.paging:paging-common", version.ref = "pagingCommon" }
+paging-compose-common = { module = "app.cash.paging:paging-compose-common", version.ref = "pagingComposeCommon" }
+#endregion
+
+#region Permissions
+moko_permissions = { module = "dev.icerock.moko:permission", version.ref = "moko-permissions-version" }
+moko_permissions-compose = { module = "dev.icerock.moko:permissions-compose", version.ref = "moko-permissions-version" }
+moko_permissions-test = { module = "dev.icerock.moko:permissions-test", version.ref = "moko-permissions-version" }
+#endregion
+
 #region Image
 coil = { module = "io.coil-kt:coil", version.ref = "coil" }
 image = { module = "media.kamel:kamel-image", version.ref = "kamelImage" }
@@ -242,6 +262,7 @@ skiko = { module = "org.jetbrains.skiko:skiko-awt-runtime-macos-arm64", version=
 
 settings = { module = "com.russhwolf:multiplatform-settings", version.ref = "settings" }
 datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "datetime" }
+
 #endregion
 
 junit = { group = "junit", name = "junit", version.ref = "junit" }
