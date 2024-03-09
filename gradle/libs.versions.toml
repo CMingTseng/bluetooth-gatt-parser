@@ -92,12 +92,8 @@ datetime = "0.5.0"
 
 junit = "4.13.2"
 junitVersion = "1.1.5"
+test_runner_version = "1.5.2"
 espressoCore = "3.5.1"
-
-
-
-
-
 
 [plugins]
 android_application = { id = "com.android.application", version.ref = "agp_version" }
@@ -250,6 +246,7 @@ datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "d
 
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
+androidx-test-runner = { group = "'androidx.test:runner:1.2.0'", name = "runner", version.ref = "test_runner_version" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
 androidx-ui-compose-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 androidx-ui-compose-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
