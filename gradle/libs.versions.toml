@@ -246,7 +246,7 @@ datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "d
 
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
-androidx-test-runner = { group = "'androidx.test:runner:1.2.0'", name = "runner", version.ref = "test_runner_version" }
+androidx-test-runner = { group = "'androidx.test'", name = "runner", version.ref = "test_runner_version" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
 androidx-ui-compose-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 androidx-ui-compose-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
