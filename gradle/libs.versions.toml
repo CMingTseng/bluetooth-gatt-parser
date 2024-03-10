@@ -3,7 +3,7 @@
 agp_version = "8.2.1" # Ref : https://developer.android.com/build/releases/past-releases
 kotlin_version = "1.9.22"
 coroutines-version = "1.7.3"
-ksp = "1.9.20-1.0.14"
+ksp = "1.9.23-1.0.19"
 #endregion
 
 #region AndroidX
@@ -85,7 +85,7 @@ napier_version = "2.6.1"
 room_version= "2.3.0"
 realm_version= "10.11.1"
 realm_kotlin_version= "1.13.0"
-sqldelight_version = '1.5.0'
+sqldelight_version = '2.0.1'#1.5.5
 #endregion
 
 okio = "3.8.0"
@@ -119,6 +119,7 @@ i18n_skeptick_libres = { id = "io.github.skeptick.libres", version = "1.2.2" }
 de-ktorfit = { id = "de.jensklingenberg.ktorfit", version.ref = "ktorfit_version" }
 realm = { id = "io.realm:realm-gradle-plugin", version.ref = "realm_version" }
 realm_kotlin = { id = "io.realm.kotlin", version.ref = "realm_kotlin_version" }
+sqlDelight = { id = "app.cash.sqldelight", version.ref = "sqldelight_version" }
 
 [libraries]
 plugin-source-android = { module = "com.android.tools.build:gradle", version.ref = "agp_version" }
@@ -190,6 +191,10 @@ ktor-jsonjs = { module = "io.ktor:ktor-client-json-js", version = "2.3.6" }
 ktor-serialization-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref="ktor-version" }
 ktor-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref="ktor-version" }
 
+ktor-server-core = { module = "io.ktor:ktor-server-core-jvm", version.ref = "ktor-version" }
+ktor-server-netty = { module = "io.ktor:ktor-server-netty-jvm", version.ref = "ktor-version" }
+ktor-server-tests = { module = "io.ktor:ktor-server-tests-jvm", version.ref = "ktor-version" }
+
 retrofit2 = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "splashscreen" }
 retrofit2-converter-gson= { group = "com.squareup.retrofit2", name = "converter-gson", version.ref = "retrofit2" }
 retrofit2-converter-scalars= { group = "com.squareup.retrofit2", name = "converter-scalars", version.ref = "retrofit2" }
@@ -246,6 +251,12 @@ i18n_skeptick_libres = { module = "io.github.skeptick.libres:libres-compose", ve
 #region DB
 realm_kotlin_base= { group = "io.realm.kotlin", name = "library-base", version.ref = "realm_kotlin_version" }
 realm_kotlin_sync= { group = "io.realm.kotlin", name = "library-sync", version.ref = "realm_kotlin_version" }
+
+sqlDelight-runtime = { module = "app.cash.sqldelight:runtime", version.ref = "sqldelight_version" }
+sqlDelight-adapter = { module = "app.cash.sqldelight:primitive-adapters", version.ref = "sqldelight_version" }
+sqlDelight-driver-android = { module = "app.cash.sqldelight:android-driver", version.ref = "sqldelight_version" }
+sqlDelight-driver-native = { module = "app.cash.sqldelight:native-driver", version.ref = "sqldelight_version" }
+sqlDelight-driver-sqlite = { module = "app.cash.sqldelight:sqlite-driver", version.ref = "sqldelight_version" }
 #endregion
 
 #region Log
